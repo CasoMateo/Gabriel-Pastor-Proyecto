@@ -1,12 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import ToDo from './components/todo';
+import App from './App';
 import reportWebVitals from './reportWebVitals';
+import TokenContextProvider from './contexts/TokenContext';
+
 
 ReactDOM.render(
   <React.StrictMode>
-    <ToDo />
+    <TokenContextProvider>
+      <App />
+    </TokenContextProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

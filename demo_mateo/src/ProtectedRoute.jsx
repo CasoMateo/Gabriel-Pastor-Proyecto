@@ -1,4 +1,7 @@
+
+
 import React, { useContext } from 'react';
+import { Route, Redirect } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import Login from './login';
 import Home from './components/Home';
@@ -7,16 +10,16 @@ import TokenContext from './contexts/TokenContext';
 import TokenContextProvider from './contexts/TokenContext';
 
 
-function App() {
-  const { token } = useContext(TokenContext);
+function ProtectedRoute(user_status: token, component: Component) {
+
+  if (user_status) {
+    return <Component> </Component>;
+  } else {
+    <Redirect> </Redirect>
+  }
   
 
-  return (
-    <TokenContextProvider>
-      { token ? <Home/> : <Login/> }
-    </TokenContextProvider>
-
-  )     
+  
 }
 
 export default App;
