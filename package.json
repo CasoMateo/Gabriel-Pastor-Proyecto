@@ -17,13 +17,12 @@
     "react": "^17.0.2",
     "react-chartjs-2": "^4.0.0",
     "react-dom": "^17.0.2",
+    "react-router-dom": "^6.2.2",
     "snippets": "^0.0.6",
     "web-vitals": "^2.1.2"
   },
   "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": { "start": "react-scripts --expose-gc --max-old-space-size=8192 start", "build": "react-scripts --expose-gc --max-old-space-size=8192 build" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CasoMateo/Nursing-Home.git"

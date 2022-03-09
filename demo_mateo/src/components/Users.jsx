@@ -1,9 +1,11 @@
-import React, { Component, useState } from 'react';
-import ReactDOM from 'react-dom'; 
-import './index.css';
-import Login from 'Login';
 
-class Users extends Component {
+import React, { Component, useState, useContext } from 'react';
+import { Redirect } from 'react-router-dom';
+import ReactDOM from 'react-dom'; 
+import '../index.css';
+import Login from '/Login';
+
+function Users() {
   
   const { token, renderModifyUsers, logout, username } = useContext(TokenContext);
 
@@ -19,29 +21,29 @@ class Users extends Component {
   addUserCredentials = () => {
 
     if (!token) {
-      return <Login/>;
+      return (<Redirect to = { {pathname: '/login', state : { from : props.location} }} />);
     }
     
-    if (!usernameAdd) || (!password) || (!level) || (!renderModifyUsers) {
+    if ((!usernameAdd) || (!password) || (!level) || (!renderModifyUsers)) {
       alert('Invalid data or credentials');
       return;
     }
 
     // make post request to api with attributes
     const addUserResource = async () => {
-      const addUser = await fetch('https://localhost.com/add-user', () => {
+      const addUser = await fetch('https://localhost.com/add-user', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 'name' : usernameAdd, 'password': password, 'level': level })
-    })}};
+    })};
 
     const response = addUserResource(); 
     const status = response.json();
 
-    if (!status.addUser) || (status.status_code != 201) {
+    if ((!status.addUser) || (status.status_code != 201)) {
       setInvalid(true);
     } else {
       setInvalid(false);
@@ -52,27 +54,27 @@ class Users extends Component {
   removeUserCredentials = () => {
 
     if (!token) {
-      return <Login/>;
+      return (<Redirect to = { {pathname: '/login', state : {  from : props.location} }}  />);
     }
-    if (!usernameRemove) || (!renderModifyUsers) {
+    if ((!usernameRemove) || (!renderModifyUsers)) {
       alert('Invalid data or credentials');
       return; 
     }
 
     const removeUserResource = async () => {
-      const removeUser = await fetch('https://localhost.com/remove-user', () => {
+      const removeUser = await fetch('https://localhost.com/remove-user', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 'name' : usernameRemove })
-    })}};
+    })};
 
     const response = removeUserResource(); 
     const status = response.json();
 
-    if (!status.removedUser) || (status.status_code != 200) {
+    if ((!status.removedUser) || (status.status_code != 200)) {
       setInvalid(true);
     } 
     else {
@@ -81,18 +83,18 @@ class Users extends Component {
 
   }
 
-  render() {
-    return (
-     <div>
+  
+  return (
+    <div>
       <div className = 'navbar'>
   
         <div className = 'general-information-container'>
-          <img src = './public/download (14) (1).png' className = 'logo-image'></img>
+          <img src = '' className = 'logo-image'></img>
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
               Nursing Home Name 
-              <br> 
+              <br /> 
               This is their slogan
             </h5>
           </div> 
@@ -101,9 +103,9 @@ class Users extends Component {
       <div className = 'navbar-buttons'>
         <div className = 'action-navbar'>
           <div className = 'home-profile'>
-            <img className = 'nav-option' id = 'home-button' src = './public/images (1).png' onClick = 'redirectHome()'> </img>
+            <img className = 'nav-option' id = 'home-button' src = '../../public/home_button' onClick = { <Redirect to = { {pathname: '/home', state : { from : props.location } }} /> }> </img>
           
-            <img className = 'nav-option' id = 'profile-button' src = './public/41-410093_circled-user-icon-user-profile-icon-png.png' onHover = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) }> </img> 
+            <img className = 'nav-option' id = 'profile-button' src = '../../public/profile_button' onHover = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) }> </img> 
 
             <div onMouseOver = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' } className = 'hover-profile'> 
               <p className = 'profile-user-credentials'> { username } </p>
@@ -129,7 +131,7 @@ class Users extends Component {
 
 
         <form className = 'add-user-credentials'> 
-          <input placeholder = 'User name' type = 'text' onChange = { e => setUserNameAdd(e.target.value)) } required> </input>
+          <input placeholder = 'User name' type = 'text' onChange = { e => setUserNameAdd(e.target.value) } required> </input>
           <input placeholder = 'User password' type = 'text' onChange = { e => setPassword(e.target.value) } required> </input>
           <div> 
             <input type="radio" id = 'chief' name = 'level' required onChange = { e => setLevel(true) }> Chief </input>
@@ -158,7 +160,7 @@ class Users extends Component {
 
     <p className = { invalid ? 'invalid-remove-credential' : 'invalid-remove-credential-false'} > 
       The credentials you entered either already exist 
-      <br>
+      <br />
       or don't exist (in case you want to remove them)
     </p>
 
@@ -185,8 +187,8 @@ class Users extends Component {
   </div>
 
   
-    )
-  }
+  );
+  
 
 }
 

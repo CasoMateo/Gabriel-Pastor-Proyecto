@@ -1,12 +1,13 @@
 
+
 import React, { useState, useRef, Component } from 'react';
 import { Pie } from 'react-chartjs-2';
 import ReactDOM from 'react-dom'; 
-import './index.css';
-import TokenContext from './contexts/TokenContext';
-import Home from './components/Home';
-import Login from './login';
-import Error404 from './errors/error404';
+import { Redirect } from 'react-router-dom';
+import '../index.css';
+import TokenContext from '../contexts/TokenContext';
+import Home from '/Home';
+import Login from '/Login';
 
 function Medicine( { ID }) { 
   // check medicine, alerts, dates, and quantities from api 
@@ -14,24 +15,24 @@ function Medicine( { ID }) {
   const { token, logout, username } = useContext(TokenContext);
 
   if (!token) {
-    return <Login/>;
+    return (<Redirect to = { {pathname: '/login', state : { from : props.location} }} />);
   }
   
   const getMedicineResource = async () => {
-      const getMedicine = await fetch('https://localhost.com/get-medicine/{ID}', () => {
+      const getMedicine = await fetch('https://localhost.com/get-medicine/{ID}', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
-  })}};
+  })};
 
   const response = getMedicineResource();
   const status = response.json();
 
-  if (!status.medicine) || (status.status_code != 200) {
+  if ((!status.medicine) || (status.status_code != 200)) {
     alert('Error retrieving medicine');
-    return <Home/>;
+    return (<Redirect to = { {pathname: '/home', state : { from : props.location} }} />);
   }
 
   const medicine = status.medicine;
@@ -44,7 +45,7 @@ function Medicine( { ID }) {
     quantities.push(badge.quantity);
   });
 
-  var data = {
+  var pie_chart_data = {
     labels: dates,
     datasets: [
       {
@@ -68,7 +69,7 @@ function Medicine( { ID }) {
       }
     ]
   };
-  var options = {
+  var pie_chart_options = {
     responsive: true,
     title: {
       display: true,
@@ -96,13 +97,13 @@ function Medicine( { ID }) {
 
   const reSetMedicine = () => {
     const getMedicineResource = async () => {
-      const getMedicine = await fetch('https://localhost.com/get-medicine/{ID}', () => {
+      const getMedicine = await fetch('https://localhost.com/get-medicine/{ID}', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
-    })}};
+    })};
 
     const response = getMedicineResource();
     const status = response.json();
@@ -115,36 +116,36 @@ function Medicine( { ID }) {
     setVerifyRef(false);
     
     if (verifyLogout) {
+    
       setVerifyLogout(false);
       return logout;
     } else if (verifyDelete) {
         setVerifyDelete(false);
 
         if (!token) {
-          alert('Not valid credentials');
-          return; 
+          return (<Redirect to = { {pathname: '/login', state : { from : props.location} }} />);
         }
       
         const deleteMedicineResource = async () => {
-          const deleteMedicine = await fetch('https://localhost.com/delete-medicine/{ID}', () => {
+          const deleteMedicine = await fetch('https://localhost.com/delete-medicine/{ID}', {
             method: 'DELETE',
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
             },
   
-        })}};
+        })};
 
         const response = deleteMedicineResource(); 
         const status = response.json();
 
-        if (!status.deleted) || (status.status_code != 200) {
+        if ((!status.deleted) || (status.status_code != 200)) {
           alert('Error deleting medicine');
           return;
         }
         
         else {
-          return <Home> </Home>;
+          return (<Redirect to = { {pathname: '/home', state : { from : props.location} }} />);
         }
         
     }
@@ -168,7 +169,7 @@ function Medicine( { ID }) {
   handleEditDate = (date, newDate) => {
 
     if (!token) {
-      return <Login/>;
+      return (<Redirect to = { {pathname: '/login', state : { from : props.location} }} />);
     }
     
     if (dateInPast(newDate)) {
@@ -178,21 +179,20 @@ function Medicine( { ID }) {
 
     // make api call to change curdate to date
     const editDateResource = async () => {
-      const editDate = await fetch('https://localhost.com/change-attribute/date/{ID}', () => {
+      const editDate = await fetch('https://localhost.com/change-date/{ID}', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: {
-          JSON.strigify({'_type': 'date', 'last': date, 'new': newDate});
-        }
-    })}};
+        body: JSON.strigify({'last': date, 'new': newDate})
+        
+    })};
 
     const response = editDateResource();
     const status = response.json();
 
-    if (!status.changedAttribute) || (!status.status_code != 200) {
+    if ((!status.changedDate) || (!status.status_code != 200)) {
       alert('Not properly changed');
       return; 
     }
@@ -204,30 +204,29 @@ function Medicine( { ID }) {
 
   handleEditName = () => {
     if (!token) {
-      return <Login/>;
+      return (<Redirect to = { {pathname: '/login', state : { from : props.location} }} />);
     }
     
     if (!editName) {
-      alert('Not valid credentials');
+      alert('Not valid data');
       return;
     }
 
     const editNameResource = async () => {
-      const editName = await fetch('https://localhost.com/change-attribute/name/{ID}', () => {
+      const editName = await fetch('https://localhost.com/change-name/{ID}', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: {
-          JSON.strigify({'_type': 'name', 'new': editName});
-        }
-    })}};
+        body: JSON.strigify({'new': editName})
+        
+    })};
 
     const response = editDateResource();
     const status = response.json();
 
-    if (!status.changedAttribute) || (!status.status_code != 200) {
+    if ((!status.changedName) || (!status.status_code != 200)) {
       alert('Not properly changed');
       return; 
     }
@@ -257,7 +256,7 @@ function Medicine( { ID }) {
       <div className = 'navbar'>
   
         <div className = 'general-information-container'>
-          <img src = './public/download (14) (1).png' className = 'logo-image'></img>
+          <img src = '' className = 'logo-image'></img>
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
@@ -271,7 +270,7 @@ function Medicine( { ID }) {
         <div className = 'navbar-buttons'>
           <div className = 'action-navbar'>
             <div className = 'home-profile'>
-              <img className = 'nav-option' id = 'home-button' onclick = 'redirectHome()' src = './public/images (1).png'> </img>
+              <img className = 'nav-option' id = 'home-button' src = './public/images (1).png' onClick = { <Redirect to = { {pathname: '/home', state : { from : props.location } }} /> }> </img>
               
               <img className = 'nav-option' id = 'profile-button' src = './public/41-410093_circled-user-icon-user-profile-icon-png.png' onHover = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) }> </img> 
 
@@ -309,10 +308,10 @@ function Medicine( { ID }) {
         
         <div className = 'medicine-info'>
           <div className = 'medicine-attributes'>
-            <div class = 'med-attribute'> 
+            <div className = 'med-attribute'> 
               <p> Name </p>
-              <input type = 'text' placeholder = { medicine.name } onChange = { e => setEditName(e.target.value) } class = 'attribute-name' required>
-              <input type = 'submit' class = 'submit-form' onClick = { handleChangeName() )> </input> 
+              <input type = 'text' placeholder = { medicine.name } onChange = { e => setEditName(e.target.value) } className = 'attribute-name' required> </input>
+              <input type = 'submit' className = 'submit-form' onClick = { handleChangeName() }> </input> 
             </div>
 
             <div class = 'med-attribute'> 
@@ -322,9 +321,9 @@ function Medicine( { ID }) {
             
             { 
               medicies.badges.map(badge => {
-                <div class = 'med-attribute'> 
+                <div className = 'med-attribute'> 
                   <p> Expiry Date </p>
-                  <input type = 'text' placeholder = { badge.date } class = 'attribute-name' required onfocus="(this.type='date')" onChange = { e => handleEditDate(badge.date, e.target.value) } > </input>
+                  <input type = 'text' placeholder = { badge.date } className = 'attribute-name' required onfocus="(this.type='date')" onChange = { e => handleEditDate(badge.date, e.target.value) } > </input>
                  
                 </div>
               }) 
@@ -336,15 +335,20 @@ function Medicine( { ID }) {
 
           <div className = 'statistics'> 
             
-            <Pie data = { data } options = { options } > 
+            <Pie data = { pie_chart_data } options = { pie_chart_options } > 
             </Pie>
 
         
           </div>
+        </div>
       </div>
 
       <div className = { (verifyLogout || verifyDelete ) ? 'verify-button' : 'verify-button-false' }>
-        <h5> Are you sure you want to do this? <br/ > You can't undo this action </h5> 
+        <h5> 
+          Are you sure you want to do this? 
+          <br /> 
+          You can't undo this action 
+        </h5> 
 
         <div className = 'verifying-buttons'>
           <button className = 'submit-form' id = 'verify-yes' onClick = { handleConfirmVerify() }>
@@ -357,65 +361,63 @@ function Medicine( { ID }) {
         </div>
       </div>
 
-    <div class = 'page-title' id = 'alerts-part'>
-      <p class = 'cur-title'> Alerts </p>
-
-
-    </div>
-
-    <div className = 'medicine-alert-division'>
-      <p>
-        Date
-      </p>
-
-      <p>
-        Quantity
-      </p>
-
-      <p>
-        Status
-      </p>
-      
-    </div>
-
-    <div className = 'alert-distributions'>
-      
-      medicine.badges.map(badge => {
-        const cur = '';
-        if (badge.diffInDays(badge.date)) {
-          cur = 'date-Expired';
-        } else if (badge.dateInPast(badge.date)) {
-          cur = 'date-Alert';
-        }
-        
-        if (cur == 'date-Expired') || (cur == 'date-Alert') {
-        
-          <div className = { cur }>
-            <p>
-              { badge.date }
-            </p>
-    
-            <p>
-              { badge.quantity }
-            </p>
-    
-            <p>
-              { cur[5: ] }
-            </p>
-            
-          </div>
-        }
-      })
-        
-
-    </div>
-      
-
-    </div>
-
-  )
-
+      <div class = 'page-title' id = 'alerts-part'>
+        <p class = 'cur-title'> Alerts </p>
   
+  
+      </div>
+  
+      <div className = 'medicine-alert-division'>
+        <p>
+          Date
+        </p>
+  
+        <p>
+          Quantity
+        </p>
+  
+        <p>
+          Status
+        </p>
+        
+      </div>
+  
+      <div className = 'alert-distributions'>
+        {
+        medicine.badges.map(badge => {
+          const cur = '';
+          if (badge.diffInDays(badge.date)) {
+            cur = 'date-Expired';
+          } else if (badge.dateInPast(badge.date)) {
+            cur = 'date-Alert';
+          }
+          
+          if ((cur == 'date-Expired') || (cur == 'date-Alert')) {
+          
+            <div className = { cur }>
+              <p>
+                { badge.date }
+              </p>
+      
+              <p>
+                { badge.quantity }
+              </p>
+      
+              <p>
+                { cur.substring(5) }
+              </p>
+              
+            </div>
+          }
+        })};
+          
+  
+      </div>
+
+    </div>
+    
+  );
+
 }
 
 export default Medicine;

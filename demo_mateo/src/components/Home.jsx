@@ -1,10 +1,11 @@
 import React, { useState, useRef, Component } from 'react';
 import ReactDOM from 'react-dom'; 
-import './index.css';
-import TokenContext from './contexts/TokenContext';
+import { Redirect } from 'react-router-dom';
+import '../index.css';
+import TokenContext from '../contexts/TokenContext';
 import Users from './Users';
 import Medicine from './Medicine';
-import Login from './login';
+import Login from './Login';
 function Home() { 
   // check reset alerts logic 
   // update alerts on logout
@@ -12,11 +13,13 @@ function Home() {
   // check add medicine form, alerts iteration 
 
   // replantear lógica
-  
-  const { token, renderModifyUsers, logout, username } = useContext(TokenContext);
+
+const { token, renderModifyUsers, logout, username } = useContext(TokenContext);
 
   if (!token) {
-    return <Login> </Login>;
+    return (
+      <Redirect to = {{ pathname: '/login', state: { from: props.location }} } />
+    );
   }
   
   const [moreOptions, setMoreOptions] = useState(false);
@@ -26,28 +29,29 @@ function Home() {
   const [verifyRef, setVerifyRef] = useState(false);
    
   const getMedicinesResource = async () => {
-    const getMedicines = await fetch('https://localhost.com/get-medicines', () => {
+    const getMedicines = await fetch('https://localhost.com/get-medicines', {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       }
-  })}};
+  })};
 
   const response = getMedicinesResource();
   const status = response.json();
 
-  if status.status_code != 200: 
+  if (status.status_code != 200) {
     alert('Failed to retrieve medicines');
     return;
+  }
 
   const medicines = status.medicines;
 
   const [ addMedicineAttributes,setAddMedicineAttributes ] = useState({ name: '', quantity: '', expiry: '' });
 
-  const [ addToMedicineAttributes, setAddToMedicineAttributes ] = useState({ _id = '', quantity: '', expiry: '' });
+  const [ addToMedicineAttributes, setAddToMedicineAttributes ] = useState({ _id : '', quantity: '', expiry: '' });
 
-  const [ subsToMedicineAttributes, setSubsToMedicineAttributes ] = useState({ _id = '', quantity: '', expiry: '' }); 
+  const [ subsToMedicineAttributes, setSubsToMedicineAttributes ] = useState({ _id : '', quantity: '', expiry: '' }); 
 
   const dateInPast = function (firstDate) {
     secondDate = new Date();
@@ -70,7 +74,7 @@ function Home() {
   const reSetMedicines = () => {
     setAddMedicineForm(false);
     const getMedicinesResource = async () => {
-      const getMedicines = await fetch('https://localhost.com/get-medicines', () => {
+      const getMedicines = await fetch('https://localhost.com/get-medicines', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -79,34 +83,36 @@ function Home() {
     })}};
 
     const modified = getMedicinesResource();
-    medicines = modified.json());
+    medicines = modified.json();
   }
 
   const handleAddMedicine = () => {
 
     if (!token) {
-      return <Login/>;
+      return (
+      <Redirect to = {{ pathname: '/login', state: { from: props.location }} } />
+    );
     }
     
-    if (addMedicineAttributes.quantity < 0) || (!addMedicineAttributes.expiry) || (dateInPast(addMedicineAttributes.expiry)) {
+    if ((addMedicineAttributes.quantity < 0) || (!addMedicineAttributes.expiry) || (dateInPast(addMedicineAttributes.expiry))) {
       alert('Not valid data');
       return;
     }
 
     const addMedicineResource = async () => {
-      const addMedicine = await fetch('https://localhost.com/add-medicine', () => {
+      const addMedicine = await fetch('https://localhost.com/add-medicine', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(addMedicineAttributes)
-    })}};
+    })};
 
     const response = addMedicineResource();
     const status = response.json();
     
-    if (!status.added) || (status.status_code != 201) {
+    if ((!status.added) || (status.status_code != 201)) {
       alert('Not properly added');
       return;
     } 
@@ -117,16 +123,18 @@ function Home() {
 
   const handleAddtoMedicine = () => {
     if (!token) {
-      return <Login/>;
+      return (
+      <Redirect to = {{ pathname: '/login', state: { from: props.location }} } />
+      );
     }
     
-    if (addToMedicineAttributes.quantity < 0) || (!addToMedicineAttributes.expiry) || (dateInPast(addToMedicineAttributes.expiry)) {
+    if ((addToMedicineAttributes.quantity < 0) || (!addToMedicineAttributes.expiry) || (dateInPast(addToMedicineAttributes.expiry))) {
       alert('Not valid data');
       return;
     }
 
     const addToMedicineResource = async () => {
-      const addToMedicine = await fetch('https://localhost.com/add-to-medicine', () => {
+      const addToMedicine = await fetch('https://localhost.com/add-to-medicine', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
@@ -138,7 +146,7 @@ function Home() {
     const response = addToMedicineResource();
     const status = response.json();
 
-    if (!status.addedTo) || (status.status_code != 200) {
+    if ((!status.addedTo) || (status.status_code != 200)) {
       alert('Not properly modified');
       return;
     }
@@ -149,28 +157,30 @@ function Home() {
 
   const handleSubstoMedicine = () => {
     if (!token) {
-      return <Login/>;
+      return (
+      <Redirect to = {{ pathname: '/login', state: { from: props.location }} } />
+    );
     }
     
-    if (subsToMedicineAttributes.quantity < 0) || (!subsToMedicineAttributes.expiry) || (dateInPast(subsToMedicineAttributes.expiry)) {
+    if ((subsToMedicineAttributes.quantity < 0) || (!subsToMedicineAttributes.expiry) || (dateInPast(subsToMedicineAttributes.expiry))) {
       alert('Not valid data');
       return;
     }
 
     const subsToMedicineResource = async () => {
-      const subsToMedicine = await fetch('https://localhost.com/subs-to-medicine', () => {
+      const subsToMedicine = await fetch('https://localhost.com/subs-to-medicine', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(subsToMedicineAttributes)
-    })}};
+    })};
 
     const response = subsToMedicineResource();
     const status = response.json();
     // make put request to API
-    if (!status.subsTo) || (status.status_code != 200) {
+    if ((!status.subsTo) || (status.status_code != 200)) {
       alert('Not properly modified');
       return;
     }
@@ -183,7 +193,7 @@ function Home() {
 
     setAddToMedicinForm(true);
     
-    setAddMedicineAttributes(prevState => ( ...prevState, _id = clickedId ));
+    setAddMedicineAttributes(prevState => ({ ...prevState, _id : clickedId }));
 
 
    
@@ -193,9 +203,25 @@ function Home() {
 
     setSubsToMedicinForm(true);
     
-    setSubsMedicineAttributes(prevState => ( ...prevState, id = clickedId ));
+    setSubsMedicineAttributes(prevState => ({ ...prevState, _id : clickedId }));
    
 
+  }
+
+
+  modifyUsers = () => {
+    return (
+    <Redirect to = { { pathname: '/users', state : { from : props.location } } } />
+    );
+  }
+
+  redirectMedicine = (id) => {
+    const path = '/medicine/';
+    path += id; 
+    
+    return ( 
+      <Redirect to = { { pathname: path, state : { from : props.location} }} />
+    );
   }
 
   closeFormTrigger = () => {
@@ -210,24 +236,8 @@ function Home() {
     medicinesRef.current.style.scrollIntoView({ behavior: 'smooth' });
   }
 
-  modifyUsers = () => {
-    return (
-    <TokenContextProvider> 
-      <Users/ >
-    </TokenContextProvider>
-  }
-
-  redirectMedicine = (id) => {
-    return ( 
-      <TokenContextProvider>
-        <Medicine ID = { id } > </Medicine> 
-      </TokenContextProvider>
-    ) 
-  }
-
 
   return (
-    
     <div>
       <div className = 'navbar'>
   
@@ -280,53 +290,49 @@ function Home() {
 
           <div className = 'add-medicine'>
             <p> ADD MED. </p>
-            // <img src = './public/Screenshot 2021-12-01 7.30.03 PM.png' className = 'part-title-option' id = 'add-medicine-button' onClick = { setAddMedicineForm(true) }> </img> 
+            <img src = './public/Screenshot 2021-12-01 7.30.03 PM.png' className = 'part-title-option' id = 'add-medicine-button' onClick = { setAddMedicineForm(true) }> </img> 
           </div>
         </div>
 
         
         <div className = 'medicine-list-root'> 
-          {  
-            if (medicines.length == 0) {
+          { medicines.length == 0 
+            ?   
               <div class = 'message-no-data'> 
                 No medicines available
               </div>
-            }
-          
-            else {
-              medicines.map(medicine => (
-                const curState = 'medicine';
+            :
+            
+            medicines.map(medicine => {
+              const curState = 'medicine';
   
-                medicine.badges.forEach(badge => {
-                  if (dateInPast(badge.date)) {
-                    curState += '-alert';
+              medicine.badges.forEach(badge => {
+                if (diffInDays(badge.date)) {
+                  curState += '-alert';
   
-                  } else if (diffInDays(badge.date)) {
-                    curState += '-expired';
-                    break;
-                  }
-                });
+                } else if (dateInPast(badge.date)) {
+                  curState += '-expired';
+                  return;
+                }
+              });
                 
-                <div className = { curState }>
-                  <p className = 'medicine-name' onClick = { redirectMedicine(medicine.id) }> 
-                    { medicine.name }
-                  </p>
+              <div className = { curState }>
+                <p className = 'medicine-name' onClick = { redirectMedicine(medicine.id) }> 
+                  { medicine.name }
+                </p>
   
-                  <p>
-                    { medicine.badges.reduce((accumulator, badge) => { 
-                      return accumator + badge.quantity;
-                    }, 0) }  
-                  </p>
+                <p>
+                  { medicine.badges.reduce((accumulator, badge) => { 
+                    return accumator + badge.quantity;
+                  }, 0) }  
+                </p>
   
-                  <img className = 'element-image' src = '' onClick = { displayAddToMedicineForm(medicine.id) }> </img>
+                <img className = 'element-image' src = '/../..' onClick = { displayAddToMedicineForm(medicine.id) }> </img>
   
-                  <img className = 'element-image' src = '' onClick = { displaySubsToMedicineForm(medicine.id) }> </img>
+                <img className = 'element-image' src = '' onClick = { displaySubsToMedicineForm(medicine.id) }> </img>
                   
-                </div>
-              
-            ))} 
-            }
-          }
+              </div>
+            })};
 
         </div>
       </div>
@@ -341,16 +347,17 @@ function Home() {
         </div>
         
         <form  onSubmit = { handleAddMedicine() }>
-          <label for="fname">Medicine Name:</label><br />
-          <input className = 'add-medicine-name' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ( ...prevState, name = e.target.value ) ) }  > </input>
-          <br />
+          <label for="fname">Medicine Name:</label>
+          <br/>
+          <input className = 'add-medicine-name' type="text" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ({ ...prevState, name : e.target.value })) }  > </input>
+          <br/>
           <label for="lname">Initial Quantity</label>
-          <br />
-          <input className = 'add-medicine-initial-quantity' type="text" id="lname" name="lname" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ...prevState, quantity = e.target.value ) }> </input>
-          <br />
+          <br/>
+          <input className = 'add-medicine-initial-quantity' type="text" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) }> </input>
+          <br/>
           <label for="lname"> Date of Expiry</label>
-          <br />
-          <input className = 'add-medicine-date-expiry' type="date" id="lname" name="lname" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ( ...prevState, expiry = e.target.value ) ) } > </input>
+          <br/>
+          <input className = 'add-medicine-date-expiry' type="date" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ({ ...prevState, expiry : e.target.value }) ) } > </input>
 
           <button type = 'submit' className = 'submit-form'> SUBMIT </button>
         </form> 
@@ -367,14 +374,15 @@ function Home() {
         </div>
         
         <form onSubmit = { handleAddToMedicine }>
-          <label for="fname">Quantity to Add</label><br />
-          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddToMedicineAttributes(prevState => (...prevState, quantity = e.target.value ) ) } > </input>
-          <br />
+          <label for="fname">Quantity to Add</label>
+          <br/>
+          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddToMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) } > </input>
+          <br/>
           <label for="lname">Date of Expiracy</label>
-          <br />
-          <input className = 'input-field-add' type="date" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddToMedicineAttributes(prevState => (...prevState, expiry = e.target.value ) ) } > </input>
-          <br />
-           <button type = 'submit' className = 'submit-form'> SUBMIT </button>
+          <br/>
+          <input className = 'input-field-add' type="date" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddToMedicineAttributes(prevState => ({ ...prevState, expiry : e.target.value })) } > </input>
+          <br/>
+          <button type = 'submit' className = 'submit-form'> SUBMIT </button>
         
         </form>
         
@@ -390,14 +398,14 @@ function Home() {
         
         <form onSubmit = { handleSubstoMedicine }>
           <label for="fname">Quantity to Consume</label>
-          <br />
-          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setSubsToMedicineAttributes(prevState => ( ...prevState, quantity = e.target.value) ) }> </input>
-          <br />
+          <br/>
+          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setSubsToMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) }> </input>
+          <br/>
           <label for="fname">Package expiry</label>
-          <br />
-          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setSubsToMedicineAttributes(prevState => ( ...prevState, expiry = e.target.value) ) }> </input>
+          <br/>
+          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setSubsToMedicineAttributes(prevState => ({ ...prevState, expiry : e.target.value })) }> </input>
 
-          <button type = '¡className = 'submit-form'> SUBMIT </button>
+          <button type = 'submit' className = 'submit-form'> SUBMIT </button>
         </form>
         
         <button className = 'submit-form'> SUBMIT </button>
@@ -418,9 +426,10 @@ function Home() {
         </div>
       </div>
 
-    </div>
+    </div> 
+    
 
-  )
+  );
 
   
 }

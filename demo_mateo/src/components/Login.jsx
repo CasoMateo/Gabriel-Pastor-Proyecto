@@ -1,18 +1,19 @@
-import React, { Component, useState } from 'react';
+import React, { Component, useState, useContext } from 'react';
 import ReactDOM from 'react-dom'; 
-import './index.css';
-import TokenContext from './contexts/TokenContext';
+import '../index.css';
+import TokenContext from '../contexts/TokenContext';
 
-class Login extends Component {
+function Login() {
   // login arguments 
   // repeated username
+  
   const { login, renderVerifyCredentials } = useContext(TokenContext);
 
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
 
-  render() {
-    return (
+  
+  return (
       <div>
         <div class="imgcontainer">
           <img src="logo512.png" alt="Avatar" class="avatar"/>       
@@ -37,10 +38,10 @@ class Login extends Component {
           </p>
       
         </div>
-      </div>
-    )
-  }
-
+      </div>    
+  )
 }
+
+
 
 export default Login;
