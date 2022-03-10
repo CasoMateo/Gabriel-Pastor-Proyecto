@@ -80,7 +80,7 @@ const { token, renderModifyUsers, logout, username } = useContext(TokenContext);
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
-    })}};
+    })};
 
     const modified = getMedicinesResource();
     medicines = modified.json();

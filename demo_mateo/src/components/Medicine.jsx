@@ -179,13 +179,13 @@ function Medicine( { ID }) {
 
     // make api call to change curdate to date
     const editDateResource = async () => {
-      const editDate = await fetch('https://localhost.com/change-date/{ID}', {
+      const editDate = await fetch('https://localhost.com/change-date', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.strigify({'last': date, 'new': newDate})
+        body: JSON.strigify({'_id': ID, 'last': date, 'new': newDate})
         
     })};
 
@@ -219,7 +219,7 @@ function Medicine( { ID }) {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.strigify({'new': editName})
+        body: JSON.strigify({'_id': ID, 'new': editName})
         
     })};
 
