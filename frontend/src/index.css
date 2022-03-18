@@ -1,0 +1,661 @@
+#medicine-name-false {
+  display: none;
+}
+
+body {
+  margin-top: 10%;
+}
+
+form {
+  border: 3px solid #f1f1f1;
+}
+
+.medicine-alert-division {
+  display: flex;
+  justify-content: space-around;
+}
+
+.date-alert, .date-expired {
+  display: flex;
+  justify-content: space-around;
+  
+}
+
+.date-alert {
+  background-color: lightyellow;
+}
+
+.date-expired {
+  background-color: #f09b81;
+}
+
+.date-alert p, .date-expired p {
+  font-weight: normal;
+  opacity: 70%;
+}
+
+.error-404 {
+  display: flex;
+  width: auto;
+  align-items: center;
+  margin-top: 3em;
+  justify-content: center;
+}
+
+.error-404 img {
+  margin-right: 3em;
+}
+
+/* Full-width inputs */
+input[type=text], input[type=password] {
+  padding: 12px 20px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.main-form {
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+  margin-right: auto;
+  width: 40%;
+  margin-bottom: 3em;
+}
+
+.message-no-data {
+  display: flex;
+  justify-content: center;
+  font-size: 1.75rem;    
+  opacity: 20%;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  padding-top: 5em;   
+  padding-bottom: 5em;
+}
+
+/* Set a style for all buttons */
+button {
+  background-color: black;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+#login {
+  width: 20%;
+}
+
+/* Add a hover effect for buttons */
+button:hover {
+  opacity: 0.8;
+}
+
+.submit-options {
+  display: flex;
+  justify-content: space-around;
+}
+
+.more-information {
+  opacity: 50%;
+  margin-top: 1em;
+}
+
+.more-information:hover {
+  opacity: 100%;
+  cursor: pointer;
+}
+
+
+/* Center the avatar image inside this container */
+.imgcontainer {
+  text-align: center;
+  margin: 24px 0 12px 0;
+}
+
+/* Avatar image */
+img.avatar {
+  width: 10%;
+}
+
+/* Add padding to containers */
+.container {
+  padding: 16px;
+}
+
+
+.logo-image {
+  width: 10%;
+  height: 40%;
+  border: 2px solid #fcfafa;
+  margin-left: 1em;
+}
+
+.navbar-buttons {
+  width: 100%;
+  margin-top: 1em;
+  display: flex;
+  
+}
+
+.main-page {
+  margin-top: 5em;
+}
+
+
+.navbar {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: gainsboro;
+  height: auto;
+  z-index: 9;
+  
+}
+
+
+
+
+.nav-option {
+  width: 7%;
+  height: 15%;
+  margin-left: 1em;
+  
+
+}
+
+
+
+.nav-option:hover {
+  opacity: 70%;
+  cursor: pointer;
+}
+
+.name-slogan {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow';
+  font-size: 1rem;
+  margin-left: 1em;
+
+}
+
+.home-profile {
+  margin-left: 1.75em;
+  display: flex;
+}
+
+
+.hover-profile {
+
+  padding: .5em;
+  background-color: lightgrey;
+  display: flex;
+  border-radius: 2rem;
+  transition: display, 1000ms ease-in-out;
+  
+  
+}
+
+.hover-profile-false {
+  display: none;
+}
+.profile-user-credentials {
+  font-size: .75em;
+  margin-right: .5em;
+}
+
+.logout, .logout-medicine {
+  border-radius: 5rem;
+  border-color: ghostwhite;
+  color: black;
+  font-size: .75rem;
+ 
+}
+
+.logout:hover, .logout-medicine:hover {
+  opacity: 75%;
+}
+
+p, a {
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-weight: 700;
+  color: black;
+  text-decoration: none;
+}
+
+.page-title {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  align-items: center;
+  border-radius: 5px;
+  position: relative;
+  margin-bottom: 2em;
+  background-color:#f0eeed;
+  box-shadow: 0 0 5px 10px #f0eeed;
+
+}
+
+.medicine-options {
+  display: grid;
+  grid-template-columns: 33% 33% 33%;
+  align-items: center;
+  border-radius: 5px;
+  position: relative;
+  margin-bottom: 2em;
+  background-color:#f0eeed;
+  box-shadow: 0 0 5px 10px #f0eeed;
+
+}
+
+.medicine-alert-notifications {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color:#f0eeed;
+  box-shadow: 0 0 5px 10px #f0eeed;
+  margin-bottom: 2em;
+}
+
+#organization-expiracy {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.add-medicine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+.medicine, .alert {
+  display: grid;
+  grid-template-columns: 70% 10% 10% 10%;
+}
+
+.medicine-alert {
+  display: grid;
+  grid-template-columns: 70% 10% 10% 10%;
+  background-color: lightyellow; 
+}
+
+.medicine-expired {
+  display: grid;
+  grid-template-columns: 70% 10% 10% 10%;
+  background-color: #f09b81; 
+}
+
+.element-name {
+  margin-left: 25%;
+}
+
+.medicine-name:hover {
+  opacity: 75%;
+}
+
+.element-image {
+  width: 40%;
+}
+
+.element-image:hover {
+  cursor: pointer;
+  opacity: 70%;
+}
+
+.general-information-container {
+  display: flex;
+  align-items: center;
+  margin-left: 10em;
+  
+}
+
+.add-medicine-form {
+  position: fixed;
+  top: 25%;
+  left: 35%;
+  width: 30%;
+  height: auto;
+  background-color: #ceceac;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  z-index: 9;
+  border-radius: 10px;
+  
+}
+
+.add-medicine-form-false {
+  display: none;
+}
+
+#reset-alerts-button, #add-medicine-button {
+  margin-left: 2em;
+  width: 10%;
+}
+
+#set-reset-medicine:hover, #add-medicine-button:hover {
+  opacity: 75%;
+  cursor: pointer;
+}
+
+.input-field-add {
+  margin-bottom: 1em;
+}
+
+.title-close-form {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 90% 10%;
+  align-items: center;
+  height: auto;
+}
+
+.form-title {
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 1.2rem;
+}
+
+.close-pop-up-form {
+  width: 50%;
+  align-self: flex-start;
+  justify-self: end;
+  margin-top: .5em;
+  margin-right: .5em;
+}
+
+.close-pop-up-form:hover {
+  opacity: 75%;
+  cursor: pointer;
+}
+
+label {
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.submit-form {
+  border-radius: 10px;
+  background-color:#c7c7c7;
+  margin-top: .5em;
+  margin-bottom: .5em;
+  width: auto;
+}
+
+.submit-form:hover {
+  cursor: pointer;
+  opacity: 75%;
+}
+
+.add-to-medicine-form {
+  position: fixed;
+  top: 25%;
+  left: 35%;
+  width: 30%;
+  height: auto;
+  background-color: #d6d6d2;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 10px;
+
+}
+
+.add-to-medicine-form-false {
+  display: none;
+
+}
+
+.subs-to-medicine-form {
+  position: fixed;
+  top: 25%;
+  left: 35%;
+  width: 30%;
+  height: auto;
+  background-color: #d6d6d2;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 10px;
+}
+
+.subs-to-medicine-form {
+  display: none;
+}
+
+.cur-title {
+  margin-left: 50%;
+}
+
+
+.verify-button {
+  position: fixed;
+  top: 40%;
+  left: 35%;
+  width: 30%;
+  height: auto;
+  background-color: #d6d6d2;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 10px;
+
+}
+
+.verify-button-false {
+  display: none;
+}
+
+.verifying-buttons {
+  display: flex;
+  justify-content: space-around;
+}
+
+#verify-yes {
+  background-color: black;
+  color: white;
+}
+
+#verify-no {
+  background-color: white;
+  color: black;
+}
+
+#verify-yes:hover, #verify-no:hover{
+  background-color: grey;
+  color: black;
+  font-weight: bolder;
+}
+
+.medicine-modify:hover {
+  opacity: 50%;
+  cursor: pointer;
+}
+
+.part-title-option {
+  width: 8%;
+  height: auto;
+  margin-right: 1em;
+  margin-left: 0.2em;
+}
+
+.part-title-option:hover {
+  opacity: 75%;
+  cursor: pointer;
+}
+
+.options-medicine {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+
+}
+
+.statistics {
+  display: grid;
+  margin-left: 25%;
+  grid-template-columns: 50% 50%;
+}
+
+.medicine-notifications {
+  margin-top: 2em;
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+}
+
+ul {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.percentages-expiracy {
+  margin-top: 1em;
+  background-color: lightgray;
+  height: 5em;
+  width: 100%;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 0 5px 10px lightgray;
+  font-weight: bolder;
+}
+
+li {
+  background-color: lightgray;
+}
+
+.medicine-attributes {
+  margin-top: 2em;
+  margin-bottom: 2em;
+  display: grid;
+  grid-template-columns: 25% 25% 25% 25%;
+  margin-left: 10%;
+}
+.med-attribute {
+  display: flex;
+}
+
+.attribute-name {
+  font-weight: 400;
+  margin-right: 1em;
+}
+
+.attribute-change {
+  width: 50%;
+  margin-right: 1em;
+  opacity: 70%;
+  border: none;
+}
+
+.edit-attribute {
+  width: 10%;
+  height: auto;
+}
+.edit-attribute:hover {
+  opacity: 75%;
+  cursor: pointer;
+}
+
+
+
+#alerts {
+  margin-top: 2em;
+}
+
+.alert-date {
+  margin-right: 1em;
+}
+
+.medicines-alerts-1, .medicines-alerts-2, .statistics-expiracy-1, .statistics-expiracy-2, .add-remove-user  {
+  
+  font-size: .75rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin-left: 1em;
+  margin-top: 1.25em;
+ 
+}
+
+.medicines-alerts-2, .statistics-expiracy-2 {
+  margin-left: 1em;
+}
+
+.medicines-alerts-1:hover, .medicines-alerts-2:hover, .statistics-expiracy-1:hover, .statistics-expiracy-2:hover, .add-remove-user:hover {
+  cursor: pointer;
+  opacity: 75%;
+}
+
+.set-reset-schedule-form {
+  position: fixed;
+  top: 25%;
+  left: 35%;
+  width: 30%;
+  height: auto;
+  background-color: #d6d6d2;
+  display: none;
+  z-index: 9;
+  border-radius: 10px;
+}
+
+.set-reset-schedule-form-false {
+  display: none;
+}
+.set-reset-schedule-buttons {
+  margin-left: 20%;
+}
+
+
+#verify-yes {
+  margin-right: 1em;
+}
+
+#user-manipulation {
+  display: flex;
+  justify-content: space-around;
+}
+
+.manipulate-user-title {
+  margin-left: 30%;
+}
+
+
+
+.invalid-remove-credential, .invalid-login-credentials {
+  color: red;
+  margin-left: 40%;
+}
+
+
+.invalid-remove-credential-false, .invalid-login-credentials-false {
+  display: none;
+}
+
+.add-user-credentials {
+  display: flex;
+  flex-direction: column; 
+  width: auto;
+}
+
+input {
+  margin-top: 1em;
+}
+
+
+.info-manipulation {
+  margin-left: 40%;
+  margin-top: 3em;
+}
+
+#manipulate-add, #manipulate-subs {
+  margin-left: 70%;
+}

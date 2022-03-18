@@ -10,7 +10,7 @@ import datetime
 from uuid import uuid4
 # checar response model 
 app = FastAPI()
-cluster = MongoClient('mongodb+srv://InventoryManager:CasMat2*<>@proyectogabrielpastor.hfvj9.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
+cluster = MongoClient('mongodb+srv://InventoryManager:<CasMat2*<>>@proyectogabrielpastor.hfvj9.mongodb.net/ProyectoGabrielPastor?retryWrites=true&w=majority')
 db = cluster['InventoryManagement']
 medicines = db['medicines']
 users = db['users']
@@ -35,8 +35,8 @@ class NewName(BaseModel):
   new: str
   
 class User(BaseModel):
-  name: str
-  password: int
+  username: str
+  password: str
   level: Optional[bool] 
 
 class findUser(BaseModel):
@@ -341,6 +341,23 @@ username: Optional[str] = Cookie(None)):
 
   return JSONResponse(content = content)
 
+@app.delete("/remove-expired-badges/{medicineID}", status_code = 200)
+def removeExpiredBadges(medicineID: str, session_id: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
+  if not authenticatedUser(session_id, username): 
+    raise HTTPException(status_code=401, detail="Unauthorized")  
+
+  content = { 'removedExpired': False }
+  
+  medicines.update_one({ '_id': medicineID }, { '$pull': { 'badges': { 'date': { 'lt': datetime.date.today() } } } })
+
+  if medicines.modified_count == 1: 
+    content['removedExpired'] = True 
+
+  else: 
+    raise HTTPException(status_code=400, detail="Invalid request")
+
+  return JSONResponse(content = content)
+              
 client = TestClient(app)
 
 def test_add_user():
@@ -403,5 +420,8 @@ def test_edit_date():
   assert response.status_code == 200
   assert response.json() == { 'changedDate': True }
 
+def test_remove_expired_date(): 
+  response = client.delete('/remove-expired-badges', headers = {'Accept': 'application/json', 'Content-Type': 'application/json', 'Cookie': 'session_id=valid_id,username:MateoCaso'}) 
 
-  
+  assert response.status_code == 200
+  assert response.json() == { 'removedExpired': True }
