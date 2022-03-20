@@ -38,16 +38,19 @@ function Home() {
   const [verifyRef, setVerifyRef] = useState(false);
    
   const getMedicinesResource = async () => {
-    const getMedicines = await fetch('https://localhost.com/get-medicines', {
+    const promise = await fetch('https://localhost.com/get-medicines', {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       }
-  })};
+    }); 
 
-  const response = getMedicinesResource();
-  const status = response.json();
+    const response = await promise.json(); 
+    return response;
+  };
+
+  const status = getMedicinesResource();
 
   if (status.status_code != 200) {
     alert('Failed to retrieve medicines');
@@ -81,18 +84,22 @@ function Home() {
   }
 
   const reSetMedicines = () => {
-    setAddMedicineForm(false);
+    
     const getMedicinesResource = async () => {
-      const getMedicines = await fetch('https://localhost.com/get-medicines', {
+      const promise = await fetch('https://localhost.com/get-medicines', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
-    })};
+      }); 
+  
+      const response = await promise.json(); 
+      return response;
+    };
 
     const modified = getMedicinesResource();
-    medicines = modified.json();
+    medicines = modified;
   }
 
   const handleAddMedicine = () => {
@@ -109,18 +116,22 @@ function Home() {
     }
 
     const addMedicineResource = async () => {
-      const addMedicine = await fetch('https://localhost.com/add-medicine', {
+      const promise = await fetch('https://localhost.com/add-medicine', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(addMedicineAttributes)
-    })};
+      });
 
-    const response = addMedicineResource();
-    const status = response.json();
-    
+      const response = await promise.json(); 
+      return response;
+
+    };
+
+    const status = addMedicineResource();
+  
     if ((!status.added) || (status.status_code != 201)) {
       alert('Not properly added');
       return;
@@ -143,17 +154,20 @@ function Home() {
     }
 
     const addToMedicineResource = async () => {
-      const addToMedicine = await fetch('https://localhost.com/add-to-medicine', {
+      const promise = await fetch('https://localhost.com/add-to-medicine', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(addToMedicineAttributes)
-    })};
+      }); 
 
-    const response = addToMedicineResource();
-    const status = response.json();
+      const response = await promise.json(); 
+      return response;
+    };
+
+    const status = addToMedicineResource();
 
     if ((!status.addedTo) || (status.status_code != 200)) {
       alert('Not properly modified');
@@ -177,17 +191,21 @@ function Home() {
     }
 
     const subsToMedicineResource = async () => {
-      const subsToMedicine = await fetch('https://localhost.com/subs-to-medicine', {
+      const promise = await fetch('https://localhost.com/subs-to-medicine', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(subsToMedicineAttributes)
-    })};
+      });
+      
+      const response = await promise.json(); 
+      return response;
 
-    const response = subsToMedicineResource();
-    const status = response.json();
+    };
+
+    const status = subsToMedicineResource();
     // make put request to API
     if ((!status.subsTo) || (status.status_code != 200)) {
       alert('Not properly modified');
@@ -198,50 +216,49 @@ function Home() {
   }
 
 
-  displayAddToMedicine = (clickedId) => {
+  const displayAddToMedicine = (clickedId) => {
 
-    setAddToMedicinForm(true);
+    setAddToMedicineForm(true);
     
-    setAddMedicineAttributes(prevState => ({ ...prevState, _id : clickedId }));
+    setAddToMedicineAttributes(prevState => ({ ...prevState, _id : clickedId }));
 
 
    
   }
 
-  displaySubsToMedicine = (clickedId) => {
+  const displaySubsToMedicine = (clickedId) => {
 
-    setSubsToMedicinForm(true);
+    setSubsToMedicineForm(true);
     
-    setSubsMedicineAttributes(prevState => ({ ...prevState, _id : clickedId }));
+    setSubsToMedicineAttributes(prevState => ({ ...prevState, _id : clickedId }));
    
 
   }
 
 
-  modifyUsers = () => {
+  const modifyUsers = () => {
     return (
     <Navigate to = { { pathname: '/users', state : { from : props.location } } } />
     );
   }
 
-  NavigateMedicine = (id) => {
-    const path = '/medicine/';
-    path += id; 
+  const NavigateMedicine = (id) => {
+    const path = '/medicine/'.concat(id);
     
     return ( 
       <Navigate to = { { pathname: path, state : { from : props.location} }} />
     );
   }
 
-  closeFormTrigger = () => {
+  const closeFormTrigger = () => {
     setAddMedicineForm(false);
     setAddToMedicineForm(false);
     setSubsMedicineForm(false);
     setVerifyRef(false);
   
   }
-
-  focusMedicines = () => {
+    
+  const focusMedicines = () => {
     medicinesRef.current.style.scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -271,7 +288,7 @@ function Home() {
 
               <div onMouseOver = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }> 
                 <p className = 'profile-user-credentials'> { username } </p>
-                <button ref = { logoutRef } className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
+                <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
               </div> 
 
               
@@ -336,9 +353,9 @@ function Home() {
                   }, 0) }  
                 </p>
   
-                <img className = 'element-image' src = '/../..' onClick = { displayAddToMedicineForm(medicine.id) }> </img>
+                <img className = 'element-image' src = '/../..' onClick = { displayAddToMedicine(medicine.id) }> </img>
   
-                <img className = 'element-image' src = '' onClick = { displaySubsToMedicineForm(medicine.id) }> </img>
+                <img className = 'element-image' src = '' onClick = { displaySubsToMedicine(medicine.id) }> </img>
                   
               </div>
             })};
@@ -382,7 +399,7 @@ function Home() {
           </img>
         </div>
         
-        <form onSubmit = { handleAddToMedicine }>
+        <form onSubmit = { handleAddtoMedicine() }>
           <label for="fname">Quantity to Add</label>
           <br/>
           <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddToMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) } > </input>
@@ -405,7 +422,7 @@ function Home() {
           </img>
         </div>
         
-        <form onSubmit = { handleSubstoMedicine }>
+        <form onSubmit = { handleSubstoMedicine() }>
           <label for="fname">Quantity to Consume</label>
           <br/>
           <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setSubsToMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) }> </input>

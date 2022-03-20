@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Link, Route, Routes } from 'react-router-dom';
-import Login from './components/Login';
-import Home from './components/Home';
-import Users from './components/Users';
-import Medicine from './components/Medicine';
+import Login from '../components/Login';
+import Home from '../components/Home';
+import Users from '../components/Users';
+import Medicine from '../components/Medicine';
 
 function ProtectedRoute(user_level) {
   // const { token, renderModifyUsers } = useContext(TokenContext);

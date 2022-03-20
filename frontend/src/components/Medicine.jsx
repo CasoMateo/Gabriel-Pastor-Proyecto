@@ -20,16 +20,19 @@ function Medicine(props) {
   
   const getMedicineResource = async () => {
     const url = 'https://localhost.com:3000/get-medicine/'.concat(props.match.params.cur_medicine);
-    const getMedicine = await fetch(url, {
+    const promise = await fetch(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       }
-  })};
+    }); 
 
-  const response = getMedicineResource();
-  const status = response.json();
+    const response = promise.json();
+    return response;
+  };
+
+  const status = getMedicineResource();
 
   if ((!status.medicine) || (status.status_code != 200)) {
     alert('Error retrieving medicine');
@@ -99,16 +102,19 @@ function Medicine(props) {
   const reSetMedicine = () => {
     const getMedicineResource = async () => {
       const url = 'https://localhost.com/get-medicine/'.concat(props.match.params.cur_medicine);
-      const getMedicine = await fetch(url, {
+      const promise = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
-    })};
+      }); 
 
-    const response = getMedicineResource();
-    const status = response.json();
+      const response = promise.json(); 
+      return response;
+    };
+
+    const status = getMedicineResource();
 
     medicine = status.medicine;
     
@@ -130,17 +136,20 @@ function Medicine(props) {
       
         const deleteMedicineResource = async () => {
           const url = 'https://localhost.com/delete-medicine/'.concat(props.match.params.cur_medicine);
-          const deleteMedicine = await fetch(url, {
+          const promise = await fetch(url, {
             method: 'DELETE',
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
             },
   
-        })};
+          }); 
 
-        const response = deleteMedicineResource(); 
-        const status = response.json();
+          const response = promise.json(); 
+          return response;
+        };
+
+        const status = deleteMedicineResource(); 
 
         if ((!status.deleted) || (status.status_code != 200)) {
           alert('Error deleting medicine');
@@ -183,7 +192,7 @@ function Medicine(props) {
     // make api call to change curdate to date
     const editDateResource = async () => {
       const url = 'https://localhost.com/change-date'.concat(props.match.params.cur_medicine);
-      const editDate = await fetch(url, {
+      const promise = await fetch(url, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
@@ -191,10 +200,13 @@ function Medicine(props) {
         },
         body: JSON.strigify({'_id': props.match.params.cur_medicine, 'last': date, 'new': newDate})
         
-    })};
+      }); 
 
-    const response = editDateResource();
-    const status = response.json();
+      const response = promise.json(); 
+      return response; 
+    };
+
+    const status = editDateResource();
 
     if ((!status.changedDate) || (!status.status_code != 200)) {
       alert('Not properly changed');
@@ -218,7 +230,7 @@ function Medicine(props) {
 
     const editNameResource = async () => {
       const url = 'https://localhost.com/change-name/'.concat(props.match.params.cur_medicine);
-      const editName = await fetch(url, {
+      const promise = await fetch(url, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
@@ -226,10 +238,12 @@ function Medicine(props) {
         },
         body: JSON.strigify({'_id': props.match.params.cur_medicine, 'new': editName})
         
-    })};
+      }); 
+      const response = promise.json(); 
+      return response;
+    };
 
-    const response = editDateResource();
-    const status = response.json();
+    const status = editNameResource();
 
     if ((!status.changedName) || (!status.status_code != 200)) {
       alert('Not properly changed');

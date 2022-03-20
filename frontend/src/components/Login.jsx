@@ -8,8 +8,14 @@ function Login() {
   // repeated username
   
   // const { login, renderVerifyCredentials } = useContext(TokenContext);
-  const login = (username, password) => {
-    console.log(username, password);
+  const handleLogin = (username, password) => {
+    if ((!username) || (!password)) {
+      alert('Invalid credentials'); 
+      return;
+    } else {
+      // run login from context
+    }
+     
   }
 
   const renderVerifyCredentials = false;
@@ -33,7 +39,7 @@ function Login() {
 
           
           <a href = 'https://docs.google.com/document/d/1Bkheg3NJuFecYHbKSZ8gIlWDWWqm3bgzd-OLUSv7KRE/edit' className = 'more-information'> More information here... </a>
-          <button type="submit" id = 'login' onClick = { function() { alert(username); alert(password) } }> Login </button>
+          <button type="submit" id = 'login' onClick = { () => (handleLogin(username, password)) } > Login </button>
 
         
         </div>

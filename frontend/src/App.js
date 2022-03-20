@@ -3,10 +3,11 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Link, Route, Routes } from 'react-router-dom';
 import Login from './components/Login';
 import Home from './components/Home';
+import Users from './components/Users';
 import TokenContext from './contexts/TokenContext';
 import TokenContextProvider from './contexts/TokenContext';
-import ProtectedRoute from './routes/ProtectedRoute';
-import UnprotectedRoute from './routes/UnprotectedRoute';
+import ProtectedRoute from './routes/ProtectedRoutes';
+import UnprotectedRoute from './routes/UnprotectedRoutes';
 
 function App() {
   // const { token, renderModifyUsers } = useContext(TokenContext);
@@ -18,6 +19,8 @@ function App() {
         <Route path = '/login' element = {<Login />}  /> 
             
         <Route path = '/home' element = { <Home /> }/>
+
+        <Route path = '/users' element = { <Users /> }/>
             
             
 
