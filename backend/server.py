@@ -24,6 +24,7 @@ class MedicineModify(BaseModel):
   _id: str
   name: str
   quantity: int
+  expiry: str
 
 class NewDate(BaseModel):
   _id: str
@@ -49,7 +50,7 @@ def authenticatedUser(session_id, username):
   
   if not username: 
     return False
-
+  
   user = users.find_one({ 'username': username })
 
   if user.size() == 0: 
@@ -57,7 +58,7 @@ def authenticatedUser(session_id, username):
     
   if not session_id: 
     if user.session_id: 
-      users.update_one({ 'username': username }, {'?unset': { 'session_id': '' }})
+      clearSessionFromDatabase(username)
 
     return False 
 
@@ -66,27 +67,20 @@ def authenticatedUser(session_id, username):
 
   return True
   
-def authenticatedUserChief(session_id, username, user_chief): 
+def authorizedUserChief(username, user_chief): 
 
-  if not username or not user_chief: 
+  if not user_chief: 
     return False
-    
-  user = users.find_one({ 'username': username }) 
 
-  if user.size() == 0: 
-    return False
-    
-  if session_id:
-    if user.session_id: 
-      users.update_one({ 'username': username }, { '?unset': { 'session_id': '' } }) 
-      
-    return False
-  
-  if user.session_id != session_id or user_chief != user.level: 
+  user = users.find_one({ 'username': username })
+  if user_chief != user.level: 
     return False 
 
   return True
 
+def clearSessionFromDatabase(username):
+  users.update_one({ 'username': username }, { '?unset': { 'session_id': '' } })
+  
 @app.post("/login")
 def login(checkUser: User, status_code = 202, session_id: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
   # check if under current structure, it would cause a problem for a user to log in with other accounts at the same time
@@ -108,7 +102,7 @@ def login(checkUser: User, status_code = 202, session_id: Optional[str] = Cookie
   if not content['loggedIn']: 
     raise HTTPException(status_code=401, detail="Unauthorized credentials")
 
-  session_id = uuid4();
+  session_id = uuid4()
   response = JSONResponse(content = content)
   response.set_cookie(key = 'session_id', value = session_id, domain="", httponly=True, max_age=1800, expires=1800) 
   response.set_cookie(key = 'username', value = checkUser.username, domain="", httponly=True, max_age=1800, expires=1800)
@@ -126,7 +120,7 @@ def login(checkUser: User, status_code = 202, session_id: Optional[str] = Cookie
 @app.post("/logout")
 def logout(status_code = 200, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
 
-  if not session_id:
+  if not authenticatedUser(session_id, username):
    raise HTTPException(status_code=400, detail="Invalid request")
    # check if given header cookies match database cookies 
   users.update_one({ 'username': username }, { '?unset': { 'session_id': '' } })
@@ -146,14 +140,14 @@ def logout(status_code = 200, session_id: Optional[str] = Cookie(None), user_chi
   
 @app.post("/add-user", status_code = 201)
 def addUser(newUser: User, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
-  if not authenticatedUserChief(session_id, username, user_chief): 
+  if not authenticatedUser(session_id, username, user_chief) or not authorizedUserChief(username, user_chief): 
     raise HTTPException(status_code=401, detail="Unauthorized")
  
   content = {'addedUser': False}
   newUser.password = bcrypt.hashpw(newUser.password, bcrypt.genSalt())
   
   if newUser.username and newUser.password:
-    if users.find_one({ 'username': newUser.username }).size() == 0: 
+    if users.find_one({ 'username': username }).size() == 0: 
       users.insert_one({ newUser })
       content['addedUser'] = True 
       
@@ -165,8 +159,8 @@ def addUser(newUser: User, session_id: Optional[str] = Cookie(None), user_chief:
   
 @app.delete("/remove-user", status_code = 200)
 def removeUser(existingUser: findUser, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
-  
-  if not authenticatedUserChief(session_id, username, user_chief): 
+ 
+  if not authenticatedUser(session_id, username) or not authorizedUserChief(username, user_chief): 
     raise HTTPException(status_code=401, detail="Unauthorized")
 
   content = {'removedUser': False}
@@ -210,13 +204,13 @@ username: Optional[str] = Cookie(None)):
 @app.post("/add-medicine", status_code = 201)
 def addMedicine(medicine: Medicine, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
-  
+
   if not authenticatedUser(session_id, username): 
     raise HTTPException(status_code=401, detail="Unauthorized")
     
   content = {'added': False}
   
-  if medicine.name and medicine.quantity > 0 and medicine.expiry and not expiredDate(medicine.date):
+  if medicine.name and medicine.quantity > 0 and medicine.expiry and not expiredDate(medicine.expiry):
     new_medicine = { 'name': medicine.name, 'badges': [{ 'date': medicine.expiry, 'quantity': medicine.quantity }]}
     medicines.insert_one(new_medicine)
     content['added'] = True
@@ -229,16 +223,13 @@ username: Optional[str] = Cookie(None)):
 @app.put("/add-to-medicine", status_code = 200)
 def addToMedicine(attributes: MedicineModify, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
-
+  
   if not authenticatedUser(session_id, username): 
     raise HTTPException(status_code=401, detail="Unauthorized") 
-    
+   
   content = {'addedTo': False}
 
-  if attributes._id != attributes._id: 
-    raise HTTPException(status_code=400, detail="Invalid request")
-    
-  if attributes.quantity > 0 and attributes.expiry and not expiredDate(attributes.date):
+  if attributes.quantity > 0 and attributes.expiry and not expiredDate(attributes.expiry):
     newBadge = {'date': attributes.expiry, 'quantity': attributes.quantity }
 
     medicines.update_one(
@@ -258,15 +249,12 @@ username: Optional[str] = Cookie(None)):
 @app.put("/subs-to-medicine/", status_code = 200)
 def subsToMedicine(attributes: MedicineModify, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
-
+  
   if not authenticatedUser(session_id, username): 
     raise HTTPException(status_code=401, detail="Unauthorized")
 
   content = {'subsTo': False}
 
-  if attributes._id != attributes._id: 
-    raise HTTPException(status_code=400, detail="Invalid request")
-    
   if attributes.quantity > 0 and attributes.expiry and not expiredDate(attributes.date):
     medicines.update_one({ '?and': [{ '_id': attributes._id }, { 'badges': { '?elemMatch': { 'quantity': { 'ge': attributes.quantity } } } } ]}, { '?inc': { 'badges.$.quantity': -attributes.quantity } })
 
