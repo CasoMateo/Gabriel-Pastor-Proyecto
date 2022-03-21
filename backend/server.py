@@ -137,7 +137,6 @@ def logout(status_code = 200, session_id: Optional[str] = Cookie(None), user_chi
 
   return response
   
-  
 @app.post("/add-user", status_code = 201)
 def addUser(newUser: User, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
   if not authenticatedUser(session_id, username, user_chief) or not authorizedUserChief(username, user_chief): 

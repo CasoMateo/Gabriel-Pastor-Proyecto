@@ -12,7 +12,7 @@ function UnprotectedRoute() {
       <Routes>
         <Route path = '/login' element = {<Login />}  /> 
             
-        
+        // add all other routes, error
       </Routes>
         
   
