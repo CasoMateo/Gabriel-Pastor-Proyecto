@@ -1,6 +1,6 @@
 import React, { useState, useRef, Component } from 'react';
 import ReactDOM from 'react-dom'; 
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../index.css';
 import TokenContext from '../contexts/TokenContext';
 import Users from './Users';
@@ -15,6 +15,7 @@ function Home() {
   // replantear lógica
 
   // const { token, renderModifyUsers, logout, username } = useContext(TokenContext);
+  const navigate = useNavigate(); 
 
   const token = true; 
   const renderModifyUsers = true; 
@@ -26,9 +27,7 @@ function Home() {
 
 
   if (!token) {
-    return (
-      <Navigate to = {{ pathname: '/login', state: { from: props.location }} } />
-    );
+    navigate('/login');
   }
   
   const [moreOptions, setMoreOptions] = useState(false);
@@ -37,27 +36,9 @@ function Home() {
   const [addMedicineForm, setAddMedicineForm] = useState(false);
   const [verifyRef, setVerifyRef] = useState(false);
    
-  const getMedicinesResource = async () => {
-    const promise = await fetch('https://localhost.com/get-medicines', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    }); 
+  
 
-    const response = await promise.json(); 
-    return response;
-  };
-
-  const status = getMedicinesResource();
-
-  if (status.status_code != 200) {
-    alert('Failed to retrieve medicines');
-    return;
-  }
-
-  const medicines = status.medicines;
+  const medicines = {};
 
   const [ addMedicineAttributes,setAddMedicineAttributes ] = useState({ name: '', quantity: '', expiry: '' });
 
@@ -105,9 +86,7 @@ function Home() {
   const handleAddMedicine = () => {
 
     if (!token) {
-      return (
-      <Navigate to = {{ pathname: '/login', state: { from: props.location }} } />
-    );
+      navigate('/login');
     }
     
     if ((addMedicineAttributes.quantity < 0) || (!addMedicineAttributes.expiry) || (dateInPast(addMedicineAttributes.expiry))) {
@@ -143,9 +122,7 @@ function Home() {
 
   const handleAddtoMedicine = () => {
     if (!token) {
-      return (
-      <Navigate to = {{ pathname: '/login', state: { from: props.location }} } />
-      );
+      navigate('/login');
     }
     
     if ((addToMedicineAttributes.quantity < 0) || (!addToMedicineAttributes.expiry) || (dateInPast(addToMedicineAttributes.expiry))) {
@@ -180,9 +157,7 @@ function Home() {
 
   const handleSubstoMedicine = () => {
     if (!token) {
-      return (
-      <Navigate to = {{ pathname: '/login', state: { from: props.location }} } />
-    );
+      navigate('/login');
     }
     
     if ((subsToMedicineAttributes.quantity < 0) || (!subsToMedicineAttributes.expiry) || (dateInPast(subsToMedicineAttributes.expiry))) {
@@ -237,17 +212,13 @@ function Home() {
 
 
   const modifyUsers = () => {
-    return (
-    <Navigate to = { { pathname: '/users', state : { from : props.location } } } />
-    );
+    navigate('/users');
   }
 
   const NavigateMedicine = (id) => {
     const path = '/medicine/'.concat(id);
     
-    return ( 
-      <Navigate to = { { pathname: path, state : { from : props.location} }} />
-    );
+    navigate(path);
   }
 
   const closeFormTrigger = () => {
@@ -268,12 +239,12 @@ function Home() {
       <div className = 'navbar'>
   
         <div className = 'general-information-container'>
-          <img src = './public/download (14) (1).png' className = 'logo-image'></img>
+          <img src = '/logo192.png' className = 'logo-image' />
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
               Nursing Home Name 
-              <br/ >
+              <br />
               This is their slogan
             </h5>
           </div> 
@@ -282,22 +253,22 @@ function Home() {
         <div className = 'navbar-buttons'>
           <div className = 'action-navbar'>
             <div className = 'home-profile'>
-              <img className = 'nav-option' id = 'home-button' src = './public/images (1).png'> </img>
+              <img className = 'nav-option' id = 'home-button' src = '/home_button.png' /> 
             
-              <img className = 'nav-option' id = 'profile-button' src = './public/41-410093_circled-user-icon-user-profile-icon-png.png' onHover = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) }> </img> 
+              <img className = 'nav-option' id = 'profile-button' src = '/profile_button.png' onHover = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } />  
 
-              <div onMouseOver = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }> 
+              <div onMouseOver = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }> 
                 <p className = 'profile-user-credentials'> { username } </p>
                 <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
               </div> 
 
               
-              <h5 onClick = { focusMedicines() } className = 'medicines-alerts-1'> 
+              <h5 onClick = { () => focusMedicines() } className = 'medicines-alerts-1'> 
                 Medicines
               </h5> 
 
               
-              <h5 className = { renderModifyUsers ? 'add-remove-user' : 'add-remove-user-false' } onClick = { modifyUsers() }> 
+              <h5 className = { renderModifyUsers ? 'add-remove-user' : 'add-remove-user-false' } onClick = { () => modifyUsers() }> 
                 Add/Remove User
               </h5>
               
@@ -310,23 +281,23 @@ function Home() {
       </div> 
 
       <div className = 'main-page'>
-        <div className = 'page-title' id = 'medicines-part' ref = { medicinesRef }>
+        <div className = 'page-title' id = 'medicines-part' >
           <p className = 'cur-title'> Inventory </p>
 
 
           <div className = 'add-medicine'>
             <p> ADD MED. </p>
-            <img src = './public/Screenshot 2021-12-01 7.30.03 PM.png' className = 'part-title-option' id = 'add-medicine-button' onClick = { setAddMedicineForm(true) }> </img> 
+            <img src = '/create_button.png' className = 'part-title-option' id = 'add-medicine-button' onClick = { () => setAddMedicineForm(true) } />
           </div>
         </div>
 
         
         <div className = 'medicine-list-root'> 
-          { medicines.length == 0 
+          { Object.keys(medicines).length == 0 
             ?   
-              <div class = 'message-no-data'> 
-                No medicines available
-              </div>
+            <div class = 'message-no-data'> 
+              No medicines available
+            </div>
             :
             
             medicines.map(medicine => {
@@ -343,19 +314,19 @@ function Home() {
               });
                 
               <div className = { curState }>
-                <p className = 'medicine-name' onClick = { NavigateMedicine(medicine.id) }> 
+                <p className = 'medicine-name' onClick = { () => NavigateMedicine(medicine.id) }> 
                   { medicine.name }
                 </p>
   
                 <p>
                   { medicine.badges.reduce((accumulator, badge) => { 
-                    return accumator + badge.quantity;
+                    return accumulator + badge.quantity;
                   }, 0) }  
                 </p>
   
-                <img className = 'element-image' src = '/../..' onClick = { displayAddToMedicine(medicine.id) }> </img>
+                <img className = 'element-image' src = '/../..' onClick = { () => displayAddToMedicine(medicine.id) } /> 
   
-                <img className = 'element-image' src = '' onClick = { displaySubsToMedicine(medicine.id) }> </img>
+                <img className = 'element-image' src = '' onClick = { () => displaySubsToMedicine(medicine.id) } /> 
                   
               </div>
             })};
@@ -368,22 +339,22 @@ function Home() {
           <h5 className = 'form-title'> 
             Add Medicine 
           </h5>
-          <img id = 'medicine-close-add' onClick = { closeFormTrigger() } className = 'close-pop-up-form' src = 'public/Screenshot 2021-12-09 7.24.30 PM.png'>
-          </img>
+          <img id = 'medicine-close-add' onClick = { () => closeFormTrigger() } className = 'close-pop-up-form' src = '/close_button.png' />
+          
         </div>
         
-        <form  onSubmit = { handleAddMedicine() }>
+        <form  onSubmit = { () => handleAddMedicine() }>
           <label for="fname">Medicine Name:</label>
           <br/>
-          <input className = 'add-medicine-name' type="text" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ({ ...prevState, name : e.target.value })) }  > </input>
+          <input className = 'add-medicine-name' type="text" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ({ ...prevState, name : e.target.value })) }  /> 
           <br/>
           <label for="lname">Initial Quantity</label>
           <br/>
-          <input className = 'add-medicine-initial-quantity' type="text" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) }> </input>
+          <input className = 'add-medicine-initial-quantity' type="text" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) } /> 
           <br/>
           <label for="lname"> Date of Expiry</label>
           <br/>
-          <input className = 'add-medicine-date-expiry' type="date" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ({ ...prevState, expiry : e.target.value }) ) } > </input>
+          <input className = 'add-medicine-date-expiry' type="date" placeholder = 'Answer the input field' required onChange = { e => setAddMedicineAttributes(prevState => ({ ...prevState, expiry : e.target.value }) ) } /> 
 
           <button type = 'submit' className = 'submit-form'> SUBMIT </button>
         </form> 
@@ -395,18 +366,18 @@ function Home() {
       <div className = { addToMedicineForm ? 'add-to-medicine-form' : 'add-to-medicine-form-false' }>
         <div className = 'title-close-form'>
           <h5 className = 'form-title'> Add to Medicine </h5>
-          <img id = 'medicine-close-add-to' className = 'close-pop-up-form' src = 'public/Screenshot 2021-12-09 7.24.30 PM.png' onClick = { closeFormTrigger() }>
-          </img>
+          <img id = 'medicine-close-add-to' className = 'close-pop-up-form' src = '/close_button.png' onClick = { () => closeFormTrigger() } />
+          
         </div>
         
-        <form onSubmit = { handleAddtoMedicine() }>
+        <form onSubmit = { () => handleAddtoMedicine() }>
           <label for="fname">Quantity to Add</label>
           <br/>
-          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddToMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) } > </input>
+          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddToMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) } /> 
           <br/>
           <label for="lname">Date of Expiracy</label>
           <br/>
-          <input className = 'input-field-add' type="date" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddToMedicineAttributes(prevState => ({ ...prevState, expiry : e.target.value })) } > </input>
+          <input className = 'input-field-add' type="date" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setAddToMedicineAttributes(prevState => ({ ...prevState, expiry : e.target.value })) } /> 
           <br/>
           <button type = 'submit' className = 'submit-form'> SUBMIT </button>
         
@@ -418,40 +389,46 @@ function Home() {
       <div className = { subsToMedicineForm ? 'subs-to-medicine-form' : 'subs-to-medicine-form-false' }>
         <div className = 'title-close-form'>
           <h5 className = 'form-title'> Consume Medicine </h5>
-          <img id = 'medicine-close-subs-to' className = 'close-pop-up-form' src = 'public/Screenshot 2021-12-09 7.24.30 PM.png' onClick = { closeFormTrigger() }>
-          </img>
+          <img id = 'medicine-close-subs-to' className = 'close-pop-up-form' src = '/close_button.png' onClick = { () => closeFormTrigger() } />
+          
         </div>
         
-        <form onSubmit = { handleSubstoMedicine() }>
+        <form onSubmit = { () => handleSubstoMedicine() }>
           <label for="fname">Quantity to Consume</label>
           <br/>
-          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setSubsToMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) }> </input>
+          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setSubsToMedicineAttributes(prevState => ({ ...prevState, quantity : e.target.value })) } /> 
           <br/>
           <label for="fname">Package expiry</label>
           <br/>
-          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setSubsToMedicineAttributes(prevState => ({ ...prevState, expiry : e.target.value })) }> </input>
+          <input className = 'input-field-add' type="text" id="fname" name="fname" placeholder = 'Answer the input field' required onChange = { e => setSubsToMedicineAttributes(prevState => ({ ...prevState, expiry : e.target.value })) } />
 
           <button type = 'submit' className = 'submit-form'> SUBMIT </button>
         </form>
         
         <button className = 'submit-form'> SUBMIT </button>
       </div>
-
+      
       <div className = { verifyRef ? 'verify-button' : 'verify-button-false' } >
-        <h5> Are you sure you want to do this? <br/ >You can't undo this action </h5> 
+        <h5> Are you sure you want to do this? <br />You can't undo this action </h5> 
 
         <div className = 'verifying-buttons'>
-          <button className = 'submit-form' id = 'verify-yes' onClick = { logout }>
+          <button className = 'submit-form' id = 'verify-yes' onClick = { () => logout }>
             YES 
           </button>
 
-          <button className = 'submit-form' id = 'verify-no' onClick = { closeFormTrigger() }>
+          <button className = 'submit-form' id = 'verify-no' onClick = { () => closeFormTrigger() }>
             CANCEL 
           </button>
     
         </div>
       </div>
 
+      
+
+      
+
+
+      
     </div> 
     
 

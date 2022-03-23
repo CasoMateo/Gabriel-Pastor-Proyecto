@@ -1,6 +1,6 @@
 
 import React, { Component, useState, useContext } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ReactDOM from 'react-dom'; 
 import '../index.css';
 import Login from './Login';
@@ -8,6 +8,7 @@ import Login from './Login';
 function Users(props) {
   
   // const { token, renderModifyUsers, logout, username } = useContext(TokenContext);
+  const navigate = useNavigate(); 
 
   const token = true; 
   const renderModifyUsers = true; 
@@ -22,14 +23,14 @@ function Users(props) {
   const [password, setPassword] = useState();
   const [level, setLevel] = useState(false);
   const [moreOptions, setMoreOptions] = useState(false);
-  const [verifyRef, setVerifyRef] = useState();
+  const [verifyRef, setVerifyRef] = useState(false);
   
   const [invalid, setInvalid] = useState(false);
   
   const addUserCredentials = () => {
 
     if (!token) {
-      return (<Navigate to = { {pathname: '/login', state : { from : props.location} }} />);
+      navigate('/login');
     }
     
     if ((!usernameAdd) || (!password) || (!level) || (!renderModifyUsers)) {
@@ -65,7 +66,7 @@ function Users(props) {
   const removeUserCredentials = () => {
 
     if (!token) {
-      return (<Navigate to = { {pathname: '/login', state : {  from : props.location} }}  />);
+      navigate('/login');
     }
     if ((!usernameRemove) || (!renderModifyUsers)) {
       alert('Invalid data or credentials');
@@ -103,7 +104,7 @@ function Users(props) {
       <div className = 'navbar'>
   
         <div className = 'general-information-container'>
-          <img src = '../../public/logo192' className = 'logo-image'></img>
+          <img src = '/logo192.png' className = 'logo-image' />
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
@@ -117,15 +118,16 @@ function Users(props) {
         <div className = 'navbar-buttons'>
           <div className = 'action-navbar'>
             <div className = 'home-profile'>
-              <img className = 'nav-option' id = 'home-button' src = '../../public/home_button' onClick = { <Navigate to = { {pathname: '/home', state : { from : props.location } } } /> } > </img>
-            
-               
-              <img className = 'nav-option' id = 'profile-button' src = '../../public/profile_button' onHover = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) }> </img>
+              <img className = 'nav-option' id = 'home-button' src = '/home_button.png' onClick = { () => navigate('/home') } /> 
+
+              <img className = 'nav-option' id = 'profile-button' src = '/profile_button.png' onHover = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } />
               
-              <div onMouseOver = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }>
+              <div onMouseOver = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }>
                 <p className = 'profile-user-credentials'> { username } </p>
-                <button className = 'logout' onClick = { setVerifyRef(true) } > Logout </button>
+                <button className = 'logout' onClick = { () => setVerifyRef(true) } > Logout </button>
               </div>
+               
+              
 
               
               
@@ -146,33 +148,40 @@ function Users(props) {
     
     
           <form className = 'add-user-credentials'>
-            <input placeholder = 'User name' type = 'text' onChange = { e => setUsernameAdd(e.target.value) } required> </input>
-            <input placeholder = 'User password' type = 'text' onChange = { e => setPassword(e.target.value) } required> </input>
+            <input placeholder = 'User name' type = 'text' onChange = { e => setUsernameAdd(e.target.value) } required /> 
+            <input placeholder = 'User password' type = 'text' onChange = { e => setPassword(e.target.value) } required /> 
+            
             <div>
-              <input type="radio" id = 'chief' name = 'level' required onChange = { setLevel(true) }> Chief </input>
-              <input type="radio" id = 'employee' name = 'level' required onChange = { setLevel(false) } > Employee </input>
-    
+              <input type="radio" id="chief"
+                     required/>
+              <label for="chief">Chief</label>
             </div>
-            <input id = 'manipulate-add' className = 'submit-form' type = 'submit' onClick = { function() { addUserCredentials() } }> </input>
+
+            <div>
+              <input type="radio" id="employee" required/>
+              <label for="employee">Employee</label>
+            </div>
+    
+ 
+            <input id = 'manipulate-add' className = 'submit-form' type = 'submit' onClick = {() => addUserCredentials()  } />
           </form>
       
         </div>
-    
+
         <div>
           <p className = 'manipulate-user-title'>
             Remove User
           </p>
     
           <form>
-            <input placeholder = 'User credentials' type = 'text' required onChange = { e => setUsernameRemove(e.target.value) }> </input>
-            <input id = 'manipulate-subs' className = 'submit-form' type = 'submit' onClick = { function() { removeUserCredentials() } }> </input>
+            <input placeholder = 'User credentials' type = 'text' required onChange = { e => setUsernameRemove(e.target.value) } /> 
+            <input id = 'manipulate-subs' className = 'submit-form' type = 'submit' onClick = { () => removeUserCredentials() } /> 
           </form>
           
         </div>
     
-    
       </div>
-    
+
       <p className = { invalid ? 'invalid-remove-credential' : 'invalid-remove-credential-false'} >
         The credentials you entered either already exist
         <br />
@@ -182,22 +191,23 @@ function Users(props) {
       <p className = 'info-manipulation'>
         Don't use accents and use proper punctuation
       </p>
-    
+
       <div className = { verifyRef ? 'verify-button' : 'verify-button-false' }>
         <h5> Are you sure you want to do this? <br /> You can't undo this action </h5>
     
         <div className = 'verifying-buttons'>
-          <button className = 'submit-form' id = 'verify-yes' onClick = { function() { logout(username) } }>
+          <button className = 'submit-form' id = 'verify-yes' onClick = { () => logout(username) } >
               YES
           </button>
     
-          <button onClick = { setVerifyRef(false) } className = 'submit-form' id = 'verify-no'>
+          <button onClick = { () => setVerifyRef(false) } className = 'submit-form' id = 'verify-no'>
               CANCEL
           </button>
         </div>
         
       </div>
-
+      
+      
     
     </div>
 

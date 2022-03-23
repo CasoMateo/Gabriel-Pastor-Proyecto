@@ -6,8 +6,9 @@ body {
   margin-top: 10%;
 }
 
-form {
-  border: 3px solid #f1f1f1;
+
+.image-404 {
+  width: 30%;
 }
 
 .medicine-alert-division {
@@ -148,6 +149,7 @@ img.avatar {
 
 .navbar {
   display: grid;
+  width: 100%;
   grid-template-columns: 60% 40%;
   justify-content: space-between;
   position: fixed;
@@ -427,7 +429,7 @@ label {
   border-radius: 10px;
 }
 
-.subs-to-medicine-form {
+.subs-to-medicine-form-false {
   display: none;
 }
 

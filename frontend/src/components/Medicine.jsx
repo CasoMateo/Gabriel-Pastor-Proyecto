@@ -3,7 +3,7 @@
 import React, { useState, useRef, Component } from 'react';
 import { Pie } from 'react-chartjs-2';
 import ReactDOM from 'react-dom'; 
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../index.css';
 import TokenContext from '../contexts/TokenContext';
 import Home from './Home';
@@ -11,11 +11,11 @@ import Login from './Login';
 
 function Medicine(props) { 
   // check medicine, alerts, dates, and quantities from api 
-  
+  const navigate = useNavigate();
   const { token, logout, username } = useContext(TokenContext);
 
   if (!token) {
-    return (<Navigate to = { {pathname: '/login', state : { from : props.location} }} />);
+    navigate('/login');
   }
   
   const getMedicineResource = async () => {
@@ -36,7 +36,7 @@ function Medicine(props) {
 
   if ((!status.medicine) || (status.status_code != 200)) {
     alert('Error retrieving medicine');
-    return (<Navigate to = { {pathname: '/home', state : { from : props.location} }} />);
+    navigate('/home');
   }
 
   const medicine = status.medicine;
@@ -131,7 +131,7 @@ function Medicine(props) {
         setVerifyDelete(false);
 
         if (!token) {
-          return (<Navigate to = { {pathname: '/login', state : { from : props.location} }} />);
+          navigate('/login');
         }
       
         const deleteMedicineResource = async () => {
@@ -157,7 +157,7 @@ function Medicine(props) {
         }
         
         else {
-          return (<Navigate to = { {pathname: '/home', state : { from : props.location} }} />);
+          navigate('/login');
         }
         
     }
@@ -181,7 +181,7 @@ function Medicine(props) {
   handleEditDate = (date, newDate) => {
 
     if (!token) {
-      return (<Navigate to = { {pathname: '/login', state : { from : props.location} }} />);
+      navigate('/login');
     }
     
     if (dateInPast(newDate)) {
@@ -220,7 +220,7 @@ function Medicine(props) {
 
   handleEditName = () => {
     if (!token) {
-      return (<Navigate to = { {pathname: '/login', state : { from : props.location} }} />);
+      navigate('/login');
     }
     
     if (!editName) {
@@ -289,7 +289,7 @@ function Medicine(props) {
         <div className = 'navbar-buttons'>
           <div className = 'action-navbar'>
             <div className = 'home-profile'>
-              <img className = 'nav-option' id = 'home-button' src = './public/images (1).png' onClick = { <Navigate to = { {pathname: '/home', state : { from : props.location } }} /> }> </img>
+              <img className = 'nav-option' id = 'home-button' src = './public/images (1).png' onClick = { () => navigate('/home') }> </img>
               
               <img className = 'nav-option' id = 'profile-button' src = './public/41-410093_circled-user-icon-user-profile-icon-png.png' onHover = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) }> </img> 
 

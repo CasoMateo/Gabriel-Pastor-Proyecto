@@ -1,27 +1,36 @@
 
 import React, { Component } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReactDOM from 'react-dom'; 
-import './index.css';
-import Home from './contexts/Home';
+import '../index.css';
 
-function error404() { 
+
+function Error404() { 
   // check medicine, alerts, dates, and quantities from api 
+  const navigate = useNavigate(); 
 
-  const redirectHome = () => {
-    return <Home> </Home>;
+  const handleRedirect = () => {
+    navigate('/login'); 
   }
-  
+
   return (
-    <div class = 'error-404'> 
-      <img src = 'public/Screenshot 2022-02-15 7.24.52 PM.png'></img>
-      <div>
-        <p> The page you are looking for doesn't exist </p>
-        <button class = 'submit-form' onClick = { redirectHome() }> GO HOME </button>
+    <div>
+      
+
+      <div class = 'error-404'> 
+        <img className = 'image-404' src = 'https://leetcode.com/static/images/404_face.png' />
+        <div>
+          <p> The page you are looking for doesn't exist </p>
+          <button class = 'submit-form' onClick = { () => handleRedirect() }>
+            Go Home
+          </button>
+        </div>
       </div>
+      
     </div>
 
-  )
+  );
 
 }
 
-export default Medicine;
+export default Error404;
