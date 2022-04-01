@@ -1,25 +1,40 @@
 
 
-import React, { useState, useRef, Component } from 'react';
+import React, { useState } from 'react';
+import { Chart, Tooltip, Title, ArcElement, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import ReactDOM from 'react-dom'; 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import '../index.css';
 import TokenContext from '../contexts/TokenContext';
 import Home from './Home';
 import Login from './Login';
 
+Chart.register(
+  Tooltip, Title, ArcElement, Legend
+);
+
 function Medicine(props) { 
   // check medicine, alerts, dates, and quantities from api 
   const navigate = useNavigate();
-  const { token, logout, username } = useContext(TokenContext);
+  const params = useParams();
+  // const { token, logout, username } = useContext(TokenContext);
+  const [medicine, setMedicine] = useState({'name': 'peptobismol', 'badges': [{'quantity': 10, 'date': '2022-03-30'}, {'quantity': 10, 'date': '2021-05-17'}] });
+  const [retrievedMedicine, setRetrievedMedicine] = useState(false);
+  const token = true; 
+  const username = 'Mateo'; 
+
+  const logout = () => {
+    alert('Logout');
+  }
 
   if (!token) {
     navigate('/login');
   }
-  
+
   const getMedicineResource = async () => {
-    const url = 'https://localhost.com:3000/get-medicine/'.concat(props.match.params.cur_medicine);
+    
+    const url = 'http://127.0.0.1:8000/get-medicine/'.concat(params.cur_medicine);
     const promise = await fetch(url, {
       method: 'GET',
       headers: {
@@ -27,77 +42,78 @@ function Medicine(props) {
         'Content-Type': 'application/json'
       }
     }); 
+    
+    const response = await promise.json();
+    
 
-    const response = promise.json();
-    return response;
+    if ((!response.medicine) || (promise.status != 200)) {
+      alert('Error retrieving medicine');
+      
+    }  
+    
+    setMedicine(response.medicine);
+  
   };
 
-  const status = getMedicineResource();
-
-  if ((!status.medicine) || (status.status_code != 200)) {
-    alert('Error retrieving medicine');
-    navigate('/home');
+  if (!retrievedMedicine) {
+    getMedicineResource(); 
+    setRetrievedMedicine(true);
   }
 
-  const medicine = status.medicine;
+  function dateDiffInDays(givenDate) {
+    // Discard the time and time-zone information.
+    const date1 = new Date();
+    const date2 = new Date(givenDate);
+    const diffDays = parseInt((date2 - date1) / (1000 * 60 * 60 * 24), 10); 
+    return diffDays <= 21;
+  }
+
+  const dateInPast = function (givenDate) {
+    const given = new Date(givenDate);
+    const diff = new Date().getTime() - given.getTime();
+    if (diff > 0) {
+       return true;
+     }
+    return false;
+  };
+
+
   
   const dates = [];
   const quantities = [];
+  const colors = [];
 
   medicine.badges.map(badge => {
     dates.push(badge.date);
     quantities.push(badge.quantity);
+
+    if (dateInPast(badge.date)) {
+      colors.push('#d1837b');
+    } else if (dateDiffInDays(badge.date)) {
+      colors.push('#ecf09c');
+    } else {
+      colors.push('#bef5b0');
+    }
+    
   });
 
-  var pie_chart_data = {
-    labels: dates,
-    datasets: [
-      {
-        label: "Distribution",
-        data: quantities,
-        backgroundColor: [
-          "#FAEBD7",
-          "#DCDCDC",
-          "#E9967A",
-          "#F5DEB3",
-          "#9ACD32"
-        ],
-        borderColor: [
-          "#E9DAC6",
-          "#CBCBCB",
-          "#D88569",
-          "#E4CDA2",
-          "#89BC21"
-        ],
-        borderWidth: [1, 1, 1, 1, 1]
-      }
-    ]
-  };
-  var pie_chart_options = {
-    responsive: true,
-    title: {
-      display: true,
-      position: "top",
-      text: "Pie Chart",
-      fontSize: 18,
-      fontColor: "#111"
-    },
-    legend: {
-      display: true,
-      position: "bottom",
-      labels: {
-        fontColor: "#333",
-        fontSize: 16
-      }
-    }
-  };
+  const pie_chart_data = {
+    datasets: [{
+        data: quantities, 
+        backgroundColor: colors
+    }],
 
+    // These labels appear in the legend and in the tooltips when hovering different arcs
+    labels: dates, 
+    
+};
+
+  
   const [editName, setEditName] = useState();
+  const [editDate, setEditDate] = useState();
   const [verifyLogout, setVerifyLogout] = useState(false);
   const [verifyDelete, setVerifyDelete] = useState(false);
   const [moreOptions, setMoreOptions] = useState(false);
-
-  const mainPageRef = useRef();
 
   const reSetMedicine = () => {
     const getMedicineResource = async () => {
@@ -115,13 +131,13 @@ function Medicine(props) {
     };
 
     const status = getMedicineResource();
-
-    medicine = status.medicine;
+    setMedicine(status.medicine);
+   
     
   }
 
-  handleConfirmVerify = () => {
-    setVerifyRef(false);
+  const handleConfirmVerify = () => {
+    
     
     if (verifyLogout) {
     
@@ -135,7 +151,7 @@ function Medicine(props) {
         }
       
         const deleteMedicineResource = async () => {
-          const url = 'https://localhost.com/delete-medicine/'.concat(props.match.params.cur_medicine);
+          const url = 'http://127.0.0.1:8000/delete-medicine/'.concat(params.cur_medicine);
           const promise = await fetch(url, {
             method: 'DELETE',
             headers: {
@@ -143,82 +159,71 @@ function Medicine(props) {
               'Content-Type': 'application/json'
             },
   
-          }); 
-
-          const response = promise.json(); 
-          return response;
+          });  
+          
+          const response = await promise.json(); 
+          
+          if ((promise.status != 200) || (!response.deleted)){
+            alert('Error deleting medicine');
+            return;
+          } 
+          navigate('/home');
         };
 
-        const status = deleteMedicineResource(); 
+        deleteMedicineResource(); 
 
-        if ((!status.deleted) || (status.status_code != 200)) {
-          alert('Error deleting medicine');
-          return;
-        }
         
-        else {
-          navigate('/login');
-        }
         
     }
 
   }
-  
-  focusMain = () => {
-    mainPageRef.current.scrollIntoView();
-  }
-
-  const dateInPast = function (firstDate) {
-    const secondDate = new Date();
-    if (firstDate.setHours(0, 0, 0, 0) <= secondDate.setHours(0, 0, 0, 0)) {
-      return true;
-    }
-
-    return false;
-  };
-
-
-  handleEditDate = (date, newDate) => {
-
+ 
+ 
+  const handleEditDate = (date) => {
+    alert(date); 
+    alert(editDate); 
     if (!token) {
       navigate('/login');
     }
     
-    if (dateInPast(newDate)) {
+    if (dateInPast(editDate)) {
       alert('Not valid credentials');
       return;
-    }
+    } 
 
     // make api call to change curdate to date
     const editDateResource = async () => {
-      const url = 'https://localhost.com/change-date'.concat(props.match.params.cur_medicine);
+      const url = 'http://127.0.0.1:8000/change-date';
       const promise = await fetch(url, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.strigify({'_id': props.match.params.cur_medicine, 'last': date, 'new': newDate})
+        body: JSON.stringify({'medicine_id': params.cur_medicine, 'last': date, 'new': editDate})
         
       }); 
 
-      const response = promise.json(); 
-      return response; 
+      const response = await promise.json(); 
+
+      if ((promise.status != 200) || (!response.changedDate)){
+        alert('Not properly changed');
+        return; 
+      }
+      
     };
 
-    const status = editDateResource();
+    editDateResource();
 
-    if ((!status.changedDate) || (!status.status_code != 200)) {
-      alert('Not properly changed');
-      return; 
-    }
-
-    reSetMedicine();
+    setRetrievedMedicine(false);
     
   }
 
 
-  handleEditName = () => {
+  const handleEditName = () => {
+    
+    alert(editName); 
+
     if (!token) {
       navigate('/login');
     }
@@ -228,46 +233,38 @@ function Medicine(props) {
       return;
     }
 
+
+
     const editNameResource = async () => {
-      const url = 'https://localhost.com/change-name/'.concat(props.match.params.cur_medicine);
+      const url = 'http://127.0.0.1:8000/change-name';
       const promise = await fetch(url, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.strigify({'_id': props.match.params.cur_medicine, 'new': editName})
+        body: JSON.stringify({'medicine_id': params.cur_medicine, 'new': editName})
         
       }); 
-      const response = promise.json(); 
-      return response;
+      const response = await promise.json(); 
+      if ((promise.status != 200) || (response.changedName)) {
+        alert('Not properly changed');
+        return; 
+      }
     };
 
-    const status = editNameResource();
+    editNameResource();
 
-    if ((!status.changedName) || (!status.status_code != 200)) {
-      alert('Not properly changed');
-      return; 
-    }
-
-    reSetMedicine();
+    setRetrievedMedicine(false);
 
   }
 
-  function dateDiffInDays(b) {
-    // Discard the time and time-zone information.
-    const a = new Date();
-    const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-    const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-    
-    return Math.floor((utc2 - utc1) / _MS_PER_DAY) <= 21;
-  }
 
   const closeForms = () => {
     setVerifyLogout(false);
     setVerifyDelete(false);
   }
-                           
+    
   
   return (
  
@@ -275,12 +272,12 @@ function Medicine(props) {
       <div className = 'navbar'>
   
         <div className = 'general-information-container'>
-          <img src = '' className = 'logo-image'></img>
+          <img src = '/logo192.png' className = 'logo-image' />
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
               Nursing Home Name 
-              <br/ > 
+              <br /> 
               This is their slogan
             </h5>
           </div> 
@@ -289,18 +286,14 @@ function Medicine(props) {
         <div className = 'navbar-buttons'>
           <div className = 'action-navbar'>
             <div className = 'home-profile'>
-              <img className = 'nav-option' id = 'home-button' src = './public/images (1).png' onClick = { () => navigate('/home') }> </img>
+              <img className = 'nav-option' id = 'home-button' src = '/home_button.png' onClick = { () => navigate('/home') } />
               
-              <img className = 'nav-option' id = 'profile-button' src = './public/41-410093_circled-user-icon-user-profile-icon-png.png' onHover = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) }> </img> 
+              <img className = 'nav-option' id = 'profile-button' src = '/profile_button.png' onMouseOver = { () => setMoreOptions(true) } /> 
 
-              <div onMouseOver = { setMoreOptions(true) } onMouseOut = { setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }> 
+              <div onMouseOver = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }> 
                 <p className = 'profile-user-credentials'> { username } </p>
-                <button onClick = { setVerifyLogout(true) } className = 'logout-medicine'> Logout </button>
+                <button onClick = { () => setVerifyLogout(true) } className = 'logout-medicine'> Logout </button>
               </div> 
-
-              <h5 onClick = { setScrollMedicines(true) } className = 'statistics-expiracy-1'> 
-                Statistics
-              </h5> 
 
   
             </div>
@@ -312,20 +305,20 @@ function Medicine(props) {
 
       <div className = 'main-page'>
 
-        <div className = 'medicine-options' ref = { mainPageRef}>
+        <div className = 'medicine-options' >
           <p className = 'cur-title'> Medicine </p>
 
 
           <div className = 'options-medicine'>
             <p> REMOVE MED. </p>
-            <img onClick = { setVerifyDelete(true) } src = './public/1054391-200.png' className = 'part-title-option' id = 'remove-medicine'> </img>
+            <img onClick = { () => setVerifyDelete(true) } src = '/trash_button.png' className = 'part-title-option' id = 'remove-medicine' /> 
 
            
           </div>
 
           <div className = 'options-medicine'>
             <p> REMOVE EXPIRED BADGES </p>
-            <img onClick = { handleRemoveExpiredBadges() } src = './public/1054391-200.png' className = 'part-title-option' id = 'remove-medicine'> </img>
+            <img onClick = { () => handleRemoveExpiredBadges() } src = 'http://simpleicon.com/wp-content/uploads/refresh.png' className = 'part-title-option' id = 'remove-medicine' /> 
 
            
           </div>
@@ -335,38 +328,57 @@ function Medicine(props) {
         <div className = 'medicine-info'>
           <div className = 'medicine-attributes'>
             <div className = 'med-attribute'> 
-              <p> Name </p>
-              <input type = 'text' placeholder = { medicine.name } onChange = { e => setEditName(e.target.value) } className = 'attribute-name' required> </input>
-              <input type = 'submit' className = 'submit-form' onClick = { handleChangeName() }> </input> 
+              <p className = 'attribute-name-medicine'> Name </p>
+              <div>
+                <input type = 'text' placeholder = { medicine.name } onChange = { e => setEditName(e.target.value) } className = 'attribute-name' required /> 
+                <input type = 'submit' className = 'submit-form' onClick = { () => handleEditName() } /> 
+              </div>            
             </div>
 
-            <div class = 'med-attribute'> 
-              <p> Quantity </p>
-              <p> { medicine.quantity } </p> 
+            <div className = 'med-attribute'> 
+              <p className = 'attribute-name-medicine'> Quantity </p>
+              <p className = 'attribute-quantity'> 
+                { medicine.badges.reduce((accumulator, badge) => { 
+                    return accumulator + badge.quantity;
+                  }, 0) } 
+              </p> 
             </div>
+
             
             { 
-              medicies.badges.map(badge => {
-                <div className = 'med-attribute'> 
-                  <p> Expiry Date </p>
-                  <input type = 'text' placeholder = { badge.date } className = 'attribute-name' required onfocus="(this.type='date')" onChange = { e => handleEditDate(badge.date, e.target.value) } > </input>
-                 
+              medicine.badges.map(badge => 
+
+                <div className = 'med-attribute'>
+                  <p className = 'attribute-name-medicine'> Expiry Date </p>
+                  <p className = 'attribute-previous-date'> <i>{ badge.date } </i> </p>
+                  <div>
+                    <input type = 'date' className = 'attribute-name' required onChange = { e => setEditDate(e.target.value) } /> 
+                    <input type = 'submit' className = 'submit-form' onClick = { () => handleEditDate(badge.date) }></input>
+                  </div>
                 </div>
-              }) 
+                
+              )
+
+            }
             
                  
-            }
+            
+            
 
           </div>
-
-          <div className = 'statistics'> 
-            
-            <Pie data = { pie_chart_data } options = { pie_chart_options } > 
-            </Pie>
+          
+          
 
         
-          </div>
         </div>
+        
+        <div className = 'statistics'> 
+            
+          <Pie data = { pie_chart_data }/> 
+
+        
+        </div>
+        
       </div>
 
       <div className = { (verifyLogout || verifyDelete ) ? 'verify-button' : 'verify-button-false' }>
@@ -377,67 +389,14 @@ function Medicine(props) {
         </h5> 
 
         <div className = 'verifying-buttons'>
-          <button className = 'submit-form' id = 'verify-yes' onClick = { handleConfirmVerify() }>
+          <button className = 'submit-form' id = 'verify-yes' onClick = { () => handleConfirmVerify() }>
             YES 
           </button>
 
-          <button onClick = { closeForms() } className = 'submit-form' id = 'verify-no'>
+          <button onClick = { () => closeForms() } className = 'submit-form' id = 'verify-no'>
             CANCEL 
           </button>
         </div>
-      </div>
-
-      <div class = 'page-title' id = 'alerts-part'>
-        <p class = 'cur-title'> Alerts </p>
-  
-  
-      </div>
-  
-      <div className = 'medicine-alert-division'>
-        <p>
-          Date
-        </p>
-  
-        <p>
-          Quantity
-        </p>
-  
-        <p>
-          Status
-        </p>
-        
-      </div>
-  
-      <div className = 'alert-distributions'>
-        {
-        medicine.badges.map(badge => {
-          const cur = '';
-          if (badge.diffInDays(badge.date)) {
-            cur = 'date-Expired';
-          } else if (badge.dateInPast(badge.date)) {
-            cur = 'date-Alert';
-          }
-          
-          if ((cur == 'date-Expired') || (cur == 'date-Alert')) {
-          
-            <div className = { cur }>
-              <p>
-                { badge.date }
-              </p>
-      
-              <p>
-                { badge.quantity }
-              </p>
-      
-              <p>
-                { cur.substring(5) }
-              </p>
-              
-            </div>
-          }
-        })};
-          
-  
       </div>
 
     </div>

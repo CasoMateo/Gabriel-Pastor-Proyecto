@@ -13,6 +13,7 @@ function Error404() {
     navigate('/login'); 
   }
 
+
   return (
     <div>
       
@@ -26,6 +27,8 @@ function Error404() {
           </button>
         </div>
       </div>
+
+
       
     </div>
 

@@ -22,7 +22,7 @@
     "web-vitals": "^2.1.2"
   },
   "devDependencies": {},
-  "scripts": { "start": "react-scripts --expose-gc --max-old-space-size=8192 start", "build": "react-scripts --expose-gc --max-old-space-size=8192 build" },
+  "scripts": { "start": "node node_modules/react-native/local-cli/cli.js start", "build": "react-scripts --expose-gc --max-old-space-size=8192 build" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CasoMateo/Nursing-Home.git"

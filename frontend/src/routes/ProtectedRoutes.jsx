@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Link, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate, Navigate } from 'react-router-dom';
 import Login from '../components/Login';
 import Home from '../components/Home';
 import Users from '../components/Users';
@@ -13,14 +13,14 @@ function ProtectedRoute(user_level) {
 
     <Router> 
       <Routes>
-        <Route path = '/login' element = {<Login />}  /> 
+        
         <Route path = '/home' element = {<Home />}  /> 
         <Route path = '/medicine/:cur_medicine' element = {<Medicine />}  /> 
 
         
         { user_level && <Route exact path="/users" element = { <Users /> } /> }
         
-        <Route path = '*' element = { <Home /> }/>
+        <Route path = '*' element = { <Navigate to = '/home' /> }/>
       </Routes>
         
   

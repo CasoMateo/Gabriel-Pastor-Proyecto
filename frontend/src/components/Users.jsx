@@ -24,11 +24,15 @@ function Users(props) {
   const [level, setLevel] = useState(false);
   const [moreOptions, setMoreOptions] = useState(false);
   const [verifyRef, setVerifyRef] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const [invalid, setInvalid] = useState(false);
   
-  const addUserCredentials = () => {
-
+  const addUserCredentials = (event) => {
+    event.preventDefault();
+    alert(usernameAdd);
+    alert(password); 
+    alert(level);
     if (!token) {
       navigate('/login');
     }
@@ -40,31 +44,34 @@ function Users(props) {
 
     // make post request to api with attributes
     const addUserResource = async () => {
-      const promise = await fetch('https://localhost.com/add-user', {
+      const promise = await fetch('http://127.0.0.1:8000/add-user', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 'name' : usernameAdd, 'password': password, 'level': level })
+        body: JSON.stringify({ 'username' : usernameAdd, 'password': password, 'level': level })
       }); 
 
+
       const response = await promise.json(); 
-      return response;
+      
+      if ((!response.addedUser) || (promise.status != 200)) {
+        setInvalid(true);
+      } else {
+        setInvalid(false);
+      }
+      
     };
 
-    const status = addUserResource(); 
+    addUserResource(); 
 
-    if ((!status.addUser) || (status.status_code != 201)) {
-      setInvalid(true);
-    } else {
-      setInvalid(false);
-    }
 
   }
 
-  const removeUserCredentials = () => {
-
+  const removeUserCredentials = (event) => {
+    event.preventDefault();
+    alert(usernameRemove);
     if (!token) {
       navigate('/login');
     }
@@ -74,27 +81,28 @@ function Users(props) {
     }
 
     const removeUserResource = async () => {
-      const promise = await fetch('https://localhost.com/remove-user', {
-        method: 'POST',
+      const promise = await fetch('http://127.0.0.1:8000/remove-user', {
+        method: 'DELETE',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 'name' : usernameRemove })
+        body: JSON.stringify({ 'username' : usernameRemove })
       }); 
       
       const response = await promise.json(); 
-      return response; 
+      if ((!response.removedUser) || (promise.status != 200)) {
+        setInvalid(true);
+      } 
+      else {
+        setInvalid(false);
+      }
+      
     };
 
-    const status = removeUserResource(); 
+    removeUserResource(); 
 
-    if ((!status.removedUser) || (status.status_code != 200)) {
-      setInvalid(true);
-    } 
-    else {
-      setInvalid(false);
-    }
+    
 
   }
 
@@ -120,9 +128,9 @@ function Users(props) {
             <div className = 'home-profile'>
               <img className = 'nav-option' id = 'home-button' src = '/home_button.png' onClick = { () => navigate('/home') } /> 
 
-              <img className = 'nav-option' id = 'profile-button' src = '/profile_button.png' onHover = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } />
+              <img className = 'nav-option' id = 'profile-button' src = '/profile_button.png' onMouseOver = { () => setMoreOptions(true) }  />
               
-              <div onMouseOver = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }>
+              <div className = { moreOptions ? 'hover-profile' : 'hover-profile-false' } onMouseOver = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } >
                 <p className = 'profile-user-credentials'> { username } </p>
                 <button className = 'logout' onClick = { () => setVerifyRef(true) } > Logout </button>
               </div>
@@ -149,21 +157,26 @@ function Users(props) {
     
           <form className = 'add-user-credentials'>
             <input placeholder = 'User name' type = 'text' onChange = { e => setUsernameAdd(e.target.value) } required /> 
-            <input placeholder = 'User password' type = 'text' onChange = { e => setPassword(e.target.value) } required /> 
-            
+            <div className = 'add-user-credentials-password'>
+              <input placeholder = 'User password' type = { showPassword ? 'text' : 'password' } onChange = { e => setPassword(e.target.value) } required /> 
+              <img className = { showPassword ? 'password-image-false' : 'show-password-button'} src = 'https://static.thenounproject.com/png/777494-200.png' onClick = { () => setShowPassword(true) }/>
+              <img className = { showPassword ? 'show-password-button' : 'password-image-false' } src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXMz0uM0TFgQDWUQc1vPMDbbusXNoOoNWOMIcCjc3o7egKnrj5gYXcxx86DPutraU24Kw&usqp=CAU' onClick = { () => setShowPassword(false)}/>
+            </div>
             <div>
               <input type="radio" id="chief"
-                     required/>
+                     required onChange = { () => setLevel(true) }/>
               <label for="chief">Chief</label>
             </div>
 
             <div>
-              <input type="radio" id="employee" required/>
+              <input type="radio" id="employee" required onChange = { () => setLevel(false) }/>
               <label for="employee">Employee</label>
             </div>
     
- 
-            <input id = 'manipulate-add' className = 'submit-form' type = 'submit' onClick = {() => addUserCredentials()  } />
+            <div>
+            
+              <input id = 'manipulate-add' className = 'submit-form' type = 'submit' onClick = {() => addUserCredentials(event)  } />
+            </div>
           </form>
       
         </div>
@@ -175,7 +188,7 @@ function Users(props) {
     
           <form>
             <input placeholder = 'User credentials' type = 'text' required onChange = { e => setUsernameRemove(e.target.value) } /> 
-            <input id = 'manipulate-subs' className = 'submit-form' type = 'submit' onClick = { () => removeUserCredentials() } /> 
+            <input id = 'manipulate-subs' className = 'submit-form' type = 'submit' onClick = { () => removeUserCredentials(event) } /> 
           </form>
           
         </div>
@@ -189,7 +202,7 @@ function Users(props) {
       </p>
     
       <p className = 'info-manipulation'>
-        Don't use accents and use proper punctuation
+        Don't use accents and use proper spelling
       </p>
 
       <div className = { verifyRef ? 'verify-button' : 'verify-button-false' }>

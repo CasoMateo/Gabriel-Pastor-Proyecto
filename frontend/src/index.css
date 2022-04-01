@@ -6,6 +6,10 @@ body {
   margin-top: 10%;
 }
 
+.medicine-name {
+  margin-left: 30%;
+}
+
 
 .image-404 {
   width: 30%;
@@ -142,11 +146,6 @@ img.avatar {
   
 }
 
-.main-page {
-  margin-top: 5em;
-}
-
-
 .navbar {
   display: grid;
   width: 100%;
@@ -211,11 +210,27 @@ img.avatar {
   margin-right: .5em;
 }
 
+.add-user-credentials-password {
+  display: flex; 
+  align-items: center; 
+
+}
+
+.show-password-button {
+  width: 40px;
+}
+
+
+.password-image-false {
+  display: none;
+}
+
 .logout, .logout-medicine {
   border-radius: 5rem;
   border-color: ghostwhite;
   color: black;
   font-size: .75rem;
+  background-color: white;
  
 }
 
@@ -324,7 +339,7 @@ p, a {
   left: 35%;
   width: 30%;
   height: auto;
-  background-color: #ceceac;
+  background-color: #d6d6d2;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -415,6 +430,10 @@ label {
 
 }
 
+.attribute-name-medicine {
+  margin-right: 2em; 
+}
+
 .subs-to-medicine-form {
   position: fixed;
   top: 25%;
@@ -472,6 +491,10 @@ label {
   color: black;
 }
 
+.attribute-previous-date {
+  font-weight: normal; 
+  margin-right: 2em;
+}
 #verify-yes:hover, #verify-no:hover{
   background-color: grey;
   color: black;
@@ -503,9 +526,9 @@ label {
 }
 
 .statistics {
-  display: grid;
-  margin-left: 25%;
-  grid-template-columns: 50% 50%;
+  margin-left: auto; 
+  width: 40%;
+  margin-right: auto;
 }
 
 .medicine-notifications {
@@ -537,15 +560,20 @@ li {
   background-color: lightgray;
 }
 
+.attribute-quantity {
+  font-weight: 100;
+}
 .medicine-attributes {
   margin-top: 2em;
   margin-bottom: 2em;
   display: grid;
-  grid-template-columns: 25% 25% 25% 25%;
+  grid-template-columns: 33% 33% 33%;
   margin-left: 10%;
+  
 }
 .med-attribute {
   display: flex;
+  justify-self: center;
 }
 
 .attribute-name {

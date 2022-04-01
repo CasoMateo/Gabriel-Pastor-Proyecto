@@ -1,17 +1,19 @@
 import React, { Component, createContext} from 'react';
-
+import { useNavigate } from 'react-router-dom'; 
 export const TokenContext = createContext();
 import Cookies from 'js-cookie';
 
 class TokenContextProvider extends Component {
   // rethink context and login logic 
-  
   state = {                                                                           
     token: Cookies.get('session-id'),
     renderModifyUsers: Cookies.get('user-chief'),
     username: Cookies.get('username'),
     renderVerifyCredentials: false
   }
+
+  navigate = useNavigate();
+
 
   setSessionAttributes = () => {
     this.setState({ token: Cookies.get('session-id')});
@@ -43,6 +45,7 @@ class TokenContextProvider extends Component {
     if ((status.loggedIn) && (status.status_code == 202)) {
       this.setState({ renderVerifyCredentials: false });
       this.setSessionAttributes();
+      this.navigate('/home');
       
     } else if (status.status_code == 400) {
       <Redirect to = { {pathname: '/home', state : { from : props.location } }} /> 
@@ -69,10 +72,11 @@ class TokenContextProvider extends Component {
 
     if (status.status_code == 200) {
       this.setSessionAttributes();
+      this.navigate('/login');
     } else {
       alert('Not able to log you out');
     }
-// implement else 
+ 
 
   }
 
