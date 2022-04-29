@@ -1,4 +1,4 @@
-import React, { useState, useRef, Component } from 'react';
+import React, { useState, useEffect, useRef, useContext, Component } from 'react';
 import ReactDOM from 'react-dom'; 
 import { useNavigate } from 'react-router-dom';
 import '../index.css';
@@ -6,27 +6,52 @@ import TokenContext from '../contexts/TokenContext';
 import Users from './Users';
 import Medicine from './Medicine';
 import Login from './Login';
-function Home() { 
+import Cookies from 'js-cookie';
+import { AuthContext } from '../contexts/AuthContext';
+
+
+function Home(props) { 
   // check reset alerts logic 
   // update alerts on logout
   // check action after submitting form (closing it)
   // check add medicine form, alerts iteration 
  
   // replantear lógica
-
-  // const { token, renderModifyUsers, logout, username } = useContext(TokenContext);
+  function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return false;
+  } 
+  // const { token, renderModifyUsers, logout, username } = useContext(AuthContext);
+  setTimeout(2000);
+ 
   const navigate = useNavigate(); 
+  
+  const loggedInResource = async () => {
+    const promise = await fetch('http://127.0.0.1:8000/is-logged-in', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json', 
+        'mode': 'cors',
+        'Cookies': document.cookie
+      }
+    }); 
+    alert(promise.status);
+    return (promise.status == 200);
+  };
 
-  const token = true; 
-  const renderModifyUsers = true; 
-  const username = 'Mateo'; 
-
-  const logout = () => {
-    alert('Logout');
-  }
-
-
-  if (!token) {
+  if (!props.token) {
     navigate('/login');
   }
   
@@ -47,19 +72,28 @@ function Home() {
     return false;
   };
 
-  const [moreOptions, setMoreOptions] = useState(false);
   const [addToMedicineForm, setAddToMedicineForm] = useState(false);
   const [subsToMedicineForm, setSubsToMedicineForm] = useState(false);
   const [addMedicineForm, setAddMedicineForm] = useState(false);
   const [verifyRef, setVerifyRef] = useState(false);
   const [medicines, setMedicines] = useState([]);
   const [retrievedMedicines, setRetrievedMedicines] = useState(false);
+  const [sortedMedicines, setSortedMedicines] = useState(true);
 
   const getMedicinesResource = async () => {
-    if (retrievedMedicines) {
+  
+    if (retrievedMedicines) {  
       return;
     }
-    const promise = await fetch('http://127.0.0.1:8000/get-medicines'); 
+
+    const promise = await fetch('http://127.0.0.1:8000/get-medicines', { 
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Cookies': document.cookie
+  
+      }
+    }); 
     
     if (promise.status != 200) {
       alert('Failed to retrieve medicines');
@@ -77,7 +111,7 @@ function Home() {
     getMedicinesResource();
     setRetrievedMedicines(true);
   }
-  
+
   const medicines_status = {}; 
   
  
@@ -97,8 +131,42 @@ function Home() {
       } 
     })
     
-    medicines_status[medicine.id] = cur_status;
+    medicines_status[medicine._id.$oid] = cur_status;
   }); 
+
+  const handleSortMedicines = () => {
+    console.log(sortedMedicines);
+    if (sortedMedicines) {
+      const sorted_medicines = []; 
+    
+      medicines.forEach(medicine => {
+        if (medicines_status[medicine._id.$oid] == 'medicine-expired') {
+          sorted_medicines.push(medicine);
+
+        }
+      });
+
+      medicines.forEach(medicine => {
+        if (medicines_status[medicine._id.$oid] == 'medicine-alert') {
+          sorted_medicines.push(medicine);
+
+        }
+      });
+
+      medicines.forEach(medicine => {
+        if (medicines_status[medicine._id.$oid] == 'medicine') {
+          sorted_medicines.push(medicine);
+
+        }
+      });
+
+      setMedicines(sorted_medicines);
+
+    } else {
+      setRetrievedMedicines(false);
+    }
+  }
+  
 
   const [ addMedicineAttributes,setAddMedicineAttributes ] = useState({ name: '', quantity: '', expiry: '' });
 
@@ -106,27 +174,6 @@ function Home() {
 
   const [ subsToMedicineAttributes, setSubsToMedicineAttributes ] = useState({ medicine_id : '', quantity: '', expiry: '' }); 
 
-   
- 
-  const reSetMedicines = () => {
-    
-    const getMedicinesResource = async () => {
-      const promise = await fetch('https://localhost.com/get-medicines', {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      }); 
-  
-      const response = await promise.json(); 
-      return response;
-    };
-
-    const modified = getMedicinesResource();
-    setMedicines(modified);
-    
-  }
 
   const handleAddMedicine = () => {
     
@@ -134,7 +181,7 @@ function Home() {
     alert(addMedicineAttributes.quantity);
     alert(addMedicineAttributes.expiry); 
     alert(addMedicineAttributes.name);
-    if (!token) {
+    if (!props.token) {
       navigate('/login');
     }
     
@@ -148,7 +195,8 @@ function Home() {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cookies': document.cookie
         },
         body: JSON.stringify(addMedicineAttributes)
       });
@@ -160,8 +208,7 @@ function Home() {
         alert('Not properly added');
         return;
       }
-
-      return response;
+      
 
     };
 
@@ -177,7 +224,7 @@ function Home() {
    
     setAddToMedicineForm(false);
     
-    if (!token) {
+    if (!props.token) {
       navigate('/login');
     }
     
@@ -191,7 +238,8 @@ function Home() {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cookies': document.cookie
         },
         body: JSON.stringify(addToMedicineAttributes)
       }); 
@@ -217,7 +265,7 @@ function Home() {
     alert(subsToMedicineAttributes.quantity);
     alert(subsToMedicineAttributes.medicine_id); 
     alert(subsToMedicineAttributes.expiry);
-    if (!token) {
+    if (!props.token) {
       navigate('/login');
     }
     
@@ -227,16 +275,18 @@ function Home() {
     }
 
     const subsToMedicineResource = async () => {
-      const promise = await fetch('http://127.0.0.1:8000//subs-to-medicine', {
+      const promise = await fetch('http://127.0.0.1:8000/subs-to-medicine', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cookies': document.cookie
         },
         body: JSON.stringify(subsToMedicineAttributes)
       });
       
-      const response = await promise.json(); 
+      const response = await promise.json();
+      console.log(response);
       if ((promise.status != 200) || (!response.subsTo)) {
         alert('Not properly modified');
         return;
@@ -246,7 +296,7 @@ function Home() {
 
     subsToMedicineResource();
     setSubsToMedicineAttributes();
-    // make put request to API
+    
      
 
     setRetrievedMedicines(false);
@@ -297,7 +347,7 @@ function Home() {
       <div className = 'navbar'>
   
         <div className = 'general-information-container'>
-          <img src = '/logo192.png' className = 'logo-image' />
+          <img src = 'gabriel_pastor_logo.png' className = 'logo-image' />
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
@@ -311,19 +361,20 @@ function Home() {
         <div className = 'navbar-buttons'>
           <div >
             <div className = 'home-profile'>
-              <img className = 'nav-option' id = 'home-button' src = '/home_button.png' /> 
+              <img className = {props.renderModifyUsers && 'nav-option' } id = { !props.renderModifyUsers && 'home-button'} src = '/home_button.png' /> 
             
-              <img className = 'nav-option' id = 'profile-button' src = '/profile_button.png' onMouseOver = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } />  
-
-              <div onMouseOver = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }> 
-                <p className = 'profile-user-credentials'> { username } </p>
-                <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
-              </div> 
+              
 
               
-              <h5 className = { renderModifyUsers ? 'add-remove-user' : 'add-remove-user-false' } onClick = { () => modifyUsers() }> 
+              <h5 className = { props.renderModifyUsers ? 'add-remove-user' : 'add-remove-user-false' } onClick = { () => modifyUsers() }> 
                 Add/Remove User
               </h5>
+
+              <h5 className = 'username-attribute'> 
+                { props.username }
+              </h5>
+
+              <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
               
             </div>
 
@@ -338,9 +389,14 @@ function Home() {
           <p className = 'cur-title'> Inventory </p>
 
 
-          <div className = 'add-medicine'>
+          <div className = 'inventory-option'>
             <p> ADD MED. </p>
             <img src = '/create_button.png' className = 'part-title-option' id = 'add-medicine-button' onClick = { () => setAddMedicineForm(true) } />
+          </div>
+
+          <div className = 'inventory-option'>
+            <p> { !sortedMedicines && 'UN' }SORT BY EXPIRY </p>
+            <img src = '/sort_button.png' className = 'part-title-option' onClick = { () => { handleSortMedicines(); setSortedMedicines(prevState => !prevState) } }/>
           </div>
         </div>
 
@@ -356,7 +412,7 @@ function Home() {
             medicines.map(medicine => 
               
                 
-              <div className = { medicines_status[medicine.id]}>
+              <div className = { medicines_status[medicine._id.$oid]}>
                 <p className = 'medicine-name' onClick = { () => NavigateMedicine(medicine._id.$oid) }> 
                   { medicine.name }
                 </p>
@@ -458,7 +514,7 @@ function Home() {
         <h5> Are you sure you want to do this? <br />You can't undo this action </h5> 
 
         <div className = 'verifying-buttons'>
-          <button className = 'submit-form' id = 'verify-yes' onClick = { () => logout }>
+          <button className = 'submit-form' id = 'verify-yes' onClick = { () => props.logout(props.username) }>
             YES 
           </button>
 

@@ -11,12 +11,15 @@ import datetime
 from uuid import uuid4
 from bson import json_util, ObjectId
 import json
+from bson.binary import UUID
+
+
 
 # checar response model 
 app = FastAPI()
 
 origins = [
-  "http://localhost:3000",
+  "http://localhost:3000"
 ]
 
 app.add_middleware(
@@ -67,6 +70,16 @@ def expiredDate(_date):
       
   return datetime.date(int(measures[0]), int(measures[1]), int(measures[2])) < datetime.date.today()
 
+def getCookie(cname, ccookies): 
+  cookies = ccookies.split('; ')
+  
+  for cookie in cookies: 
+    cur = cookie.split('=')
+    if cur[0] == cname: 
+      return cur[1]
+
+  return False 
+
 def authenticatedUser(session_id, username): 
   
   if not username: 
@@ -74,16 +87,19 @@ def authenticatedUser(session_id, username):
   
   user = users.find_one({ 'username': username })
 
-  if user.size() == 0: 
+  if not user: 
     return False 
     
   if not session_id: 
-    if user.session_id: 
+    if user['session_id']: 
       clearSessionFromDatabase(username)
 
     return False 
 
-  if user.session_id != session_id: 
+  if 'session_id' not in user.keys(): 
+    return False 
+     
+  if user['session_id'] != session_id: 
     return False 
 
   return True
@@ -94,7 +110,7 @@ def authorizedUserChief(username, user_chief):
     return False
 
   user = users.find_one({ 'username': username })
-  if user_chief != user.level: 
+  if not user['level']: 
     return False 
 
   return True
@@ -103,65 +119,83 @@ def clearSessionFromDatabase(username):
   users.update_one({ 'username': username }, { '?unset': { 'session_id': '' } })
   
 @app.post("/login", status_code = 202)
-def login(checkUser: User, session_id: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
+def login(request: Request, checkUser: User, session_id: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
   # check if under current structure, it would cause a problem for a user to log in with other accounts at the same time
-
-  if authenticatedUser(session_id, username): 
-    raise HTTPException(status_code=400, detail="Only one account can be opened at a time, you must logout")
+  
+  if authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized")
     
   content = {'loggedIn': False, 'level': False}
-  
   if checkUser.username and checkUser.password:
     user = users.find_one({ 'username': checkUser.username })
-    if user.size() == 1: 
-      if bcrypt.compare(checkUser.password, user.password): 
+    
+    if user: 
+      if bcrypt.hashpw(checkUser.password.encode('utf8'), user['password']) == user['password']: 
         content['loggedIn'] = True
         
-        if user.level: 
+        if user['level']: 
           content['level'] = True
-        
+      
   if not content['loggedIn']: 
     raise HTTPException(status_code=401, detail="Unauthorized credentials")
 
   session_id = uuid4()
+  content['session_id'] = str(session_id)
   response = JSONResponse(content = content)
-  response.set_cookie(key = 'session_id', value = session_id, domain="localhost:3000", httponly=True, max_age=1800, expires=1800) 
-  response.set_cookie(key = 'username', value = checkUser.username, domain="localhost:3000", httponly=True, max_age=1800, expires=1800)
   
-  if content['level']:
-    response.set_cookie(key = 'user_chief', value = True, domain="", httponly=True, max_age=1800, expires=1800)
 
   users.update_one(
     { 'username': checkUser.username },
-    {'?set': { 'session_id': session_id }}
+    {'$set': { 'session_id': str(session_id) }}
   )
   
   return response
 
+@app.get("/is-logged-in", status_code = 200)
+def isLoggedIn(request: Request):
+  
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized") 
+
+  pass 
+
+
 @app.post("/logout", status_code = 200)
-def logout(session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
+def logout(request: Request, user: findUser, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
 
-  if not authenticatedUser(session_id, username):
-   raise HTTPException(status_code=400, detail="Invalid request")
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized")
    # check if given header cookies match database cookies 
-  users.update_one({ 'username': username }, { '?unset': { 'session_id': '' } })
-
-  if users.modified_count != 1: 
+  if not users.find_one_and_update({ 'username': user.username }, { '$unset': { 'session_id': '' } }):
     raise HTTPException(status_code=400, detail="Invalid request")
-    
-  response = JSONResponse() 
-  response.delete_cookie('session_id', domain = 'localhost:3000')
-  response.delete_cookie('username', domain = 'localhost:3000') 
+  
+  response = JSONResponse(content = { 'loggedOut': True }) 
 
-  if authorizedUserChief(username, user_chief):
+  return response
 
-    response.delete_cookie('user_chief', domain = 'localhost:3000') 
+@app.get("/get-users", status_code = 200)
+def getUsers(request: Request):
+
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])) or not authorizedUserChief(getCookie('username', request.headers['cookies']), getCookie('user_chief', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized")
+   # check if given header cookies match database cookies 
+  
+  usernames = []
+  all_users = [user for user in users.find()]
+  
+  for user in all_users: 
+    usernames.append(user['username'])
+  
+  content = { 'users': usernames }
+  response = JSONResponse(content = content) 
 
   return response
   
 @app.post("/add-user", status_code = 201)
-def addUser(user: User, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
+def addUser(request: Request, user: User, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
   
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])) or not authorizedUserChief(getCookie('username', request.headers['cookies']), getCookie('user_chief', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized")
  
   content = {'addedUser': False}
   password = bcrypt.hashpw(user.password.encode('utf8'), bcrypt.gensalt())
@@ -174,14 +208,19 @@ def addUser(user: User, session_id: Optional[str] = Cookie(None), user_chief: Op
       
   if not content['addedUser']: 
     raise HTTPException(status_code=400, detail="Invalid request")
-
+  
   return JSONResponse(content = content)
   
   
 @app.delete("/remove-user", status_code = 200)
-def removeUser(existingUser: findUser, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
- 
+def removeUser(request: Request, existingUser: findUser, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
+
   
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])) or not authorizedUserChief(getCookie('username', request.headers['cookies']), getCookie('user_chief', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized")
+
+  if existingUser.username == getCookie('username', request.headers['cookies']):
+    raise HTTPException(status_code=400, detail="Bad request")
 
   content = {'removedUser': False}
   
@@ -195,20 +234,23 @@ def removeUser(existingUser: findUser, session_id: Optional[str] = Cookie(None),
   return JSONResponse(content = content)
   
 @app.get('/get-medicines', status_code = 201)
-def getMedicines(session_id: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
-
-
+def getMedicines(request: Request, session_id: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
   
-  content = {}
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized")
+
+  content = {} 
   
   content['medicines'] = [json.loads(json_util.dumps(medicine)) for medicine in medicines.find()]
   return JSONResponse(content = content)
 
 @app.get('/get-medicine/{medicineID}', status_code = 200)
-def getMedicine(medicineID: str, session_id: Optional[str] = Cookie(None), 
+def getMedicine(request: Request, medicineID: str, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
 
-    
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized") 
+
   content = {}
   
   content['medicine'] = medicines.find_one({ '_id': ObjectId(medicineID) })
@@ -220,10 +262,11 @@ username: Optional[str] = Cookie(None)):
   return JSONResponse(content = content)
 
 @app.post("/add-medicine", status_code = 201)
-def addMedicine(medicine: Medicine, session_id: Optional[str] = Cookie(None), 
+def addMedicine(request: Request, medicine: Medicine, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
 
-  
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized") 
     
   content = {'added': False}
   
@@ -238,42 +281,64 @@ username: Optional[str] = Cookie(None)):
   return JSONResponse(content = content)
 
 @app.put("/add-to-medicine", status_code = 200)
-def addToMedicine(attributes: MedicineModify, session_id: Optional[str] = Cookie(None), 
+def addToMedicine(request: Request, attributes: MedicineModify, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
+
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized") 
   
-  
-   
   content = {'addedTo': False}
+  medicine = medicines.find_one({'_id': ObjectId(attributes.medicine_id)})
+  if attributes.quantity > 0 and attributes.expiry:
 
-  if attributes.quantity > 0 and attributes.expiry and not expiredDate(attributes.expiry):
-    newBadge = {'date': attributes.expiry, 'quantity': attributes.quantity }
-    if medicines.find_one_and_update(
-      { '_id': ObjectId(attributes.medicine_id)}, 
-      { '$push': { 'badges': newBadge } }
+    for badge in range(len(medicine['badges'])): 
+      if medicine['badges'][badge]['date'] == attributes.expiry: 
+        medicine['badges'][badge]['quantity'] += attributes.quantity 
+        content['addedTo'] = True 
+        medicines.delete_one({'_id': ObjectId(attributes.medicine_id)})
+        medicines.insert_one(medicine)
 
-    ):
+    if not content['addedTo']:
+      newBadge = {'date': attributes.expiry, 'quantity': attributes.quantity }
+      if medicines.find_one_and_update(
+        { '_id': ObjectId(attributes.medicine_id)}, 
+        { '$push': { 'badges': newBadge } }
 
-      content['addedTo'] = True
+      ):
+
+        content['addedTo'] = True
 
   if not content['addedTo']: 
     raise HTTPException(status_code=400, detail="Invalid request")
 
   return JSONResponse(content = content)
 
-@app.put("/subs-to-medicine/", status_code = 200)
-def subsToMedicine(attributes: MedicineModify, session_id: Optional[str] = Cookie(None), 
+@app.put("/subs-to-medicine", status_code = 200)
+def subsToMedicine(request: Request, attributes: MedicineModify, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
   
-
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized") 
 
   content = {'subsTo': False}
+  medicine = dict(medicines.find_one({'_id': ObjectId(attributes.medicine_id)})) 
+  
+  if attributes.quantity > 0 and attributes.expiry:
 
-  if attributes.quantity > 0 and attributes.expiry and not expiredDate(attributes.expiry):
-    medicines.update_one({ '$and': [{ '_id': attributes.medicine_id }, 
-    { 'badges': { '$elemMatch': {'$and': [{ 'quantity': { 'ge': attributes.quantity } }, 
-    {'date': attributes.expiry}] } }}]}, { '$inc': { 'badges.$.quantity': -attributes.quantity } })
+    for badge in range(len(medicine['badges'])): 
+      if medicine['badges'][badge]['date'] == attributes.expiry and medicine['badges'][badge]['quantity'] >= attributes.quantity: 
+        if medicine['badges'][badge]['quantity'] == attributes.quantity: 
+          medicine['badges'] = medicine['badges'][: badge] + medicine['badges'][badge + 1: ] 
+          
 
-    
+        else:
+          medicine['badges'][badge]['quantity'] -= attributes.quantity 
+        
+        break
+
+  if medicine != medicines.find_one({'_id': ObjectId(attributes.medicine_id)}):
+    medicines.delete_one({'_id': ObjectId(attributes.medicine_id)})
+    medicines.insert_one(medicine)
     content['subsTo'] = True 
 
   if not content['subsTo']: 
@@ -282,10 +347,11 @@ username: Optional[str] = Cookie(None)):
   return JSONResponse(content = content)
    
 @app.delete("/delete-medicine/{medicineID}", status_code = 200)
-def deleteMedicine(medicineID: str, session_id: Optional[str] = Cookie(None), 
+def deleteMedicine(request: Request, medicineID: str, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
 
-  
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized") 
     
   content = {'deleted': False}
   
@@ -299,27 +365,32 @@ username: Optional[str] = Cookie(None)):
     
     
 @app.put("/change-name", status_code = 200)
-def editName(name: NewName, session_id: Optional[str] = Cookie(None), 
+def editName(request: Request, name: NewName, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
   
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized") 
 
   if not name.new: 
     raise HTTPException(status_code=400, detail="Invalid request") 
     
   content = {'changedName': False}
 
-  medicines.update_one(
+  if medicines.find_one_and_update(
     { '_id': ObjectId(name.medicine_id) }, 
     { '$set' : { 'name': name.new } }
 
-  )
+  ):
+    content['changedName'] = True
   
   return JSONResponse(content = content)
 
 @app.put("/change-date", status_code = 200)
-def editDate(date: NewDate, session_id: Optional[str] = Cookie(None), 
+def editDate(request: Request, date: NewDate, session_id: Optional[str] = Cookie(None), 
 username: Optional[str] = Cookie(None)):
   
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized") 
 
   if not date.new or not date.last: 
     raise HTTPException(status_code=400, detail="Invalid request") 
@@ -328,38 +399,49 @@ username: Optional[str] = Cookie(None)):
 
   medicine = dict(medicines.find_one({'_id': ObjectId(date.medicine_id)}))
 
-  for badge in medicines['badges']:
-    if badge['date'] == date.last: 
-      badge['date'] = date.new  
+  for badge in range(len(medicine['badges'])): 
     
-  print(medicine)
+    if medicine['badges'][badge]['date'] == date.last:
+      medicine['badges'][badge]['date'] = date.new
 
-  medicines.update_one({'_id' : date.medicine_id }, {'$set': medicine })
+  if medicine != medicines.find_one({'_id': ObjectId(date.medicine_id)}): 
+    content['changedDate'] = True 
+
+  medicines.delete_one({'_id' : ObjectId(date.medicine_id) })
+  medicines.insert_one(medicine)
       
-  
-
-  
 
   return JSONResponse(content = content)
 
 @app.delete("/remove-expired-badges/{medicineID}", status_code = 200)
-def removeExpiredBadges(medicineID: str, session_id: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
-  if not authenticatedUser(session_id, username): 
-    raise HTTPException(status_code=401, detail="Unauthorized")  
+def removeExpiredBadges(request: Request, medicineID: str, session_id: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
+  
+  if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
+    raise HTTPException(status_code=401, detail="Unauthorized") 
 
   content = { 'removedExpired': False }
-  
-  medicines.update_one({ '_id': medicineID }, { '$pull': { 'badges': { 'date': { 'lt': datetime.date.today() } } } })
+  medicine = dict(medicines.find_one({'_id': ObjectId(medicineID)}))
+  expired = []
 
-  if medicines.modified_count == 1: 
+  for badge in range(len(medicine['badges'])):
+    if expiredDate(medicine['badges'][badge]['date']): 
+      expired.append(badge)
+    
+  for cur in expired: 
+    medicine['badges'] = medicine['badges'][: cur] + medicine['badges'][cur + 1: ]
+  
+  if medicine != medicines.find_one({'_id': ObjectId(medicineID)}): 
+    medicines.delete_one({'_id': ObjectId(medicineID)})
+    medicines.insert_one(medicine)
     content['removedExpired'] = True 
 
   else: 
     raise HTTPException(status_code=400, detail="Invalid request")
 
   return JSONResponse(content = content)
-              
-client = TestClient(app)
+
+client = TestClient(app) 
+
 
 def test_add_user():
   response = client.get('/add-user', headers = {'Accept': 'application/json', 

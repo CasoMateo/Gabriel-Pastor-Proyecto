@@ -30,54 +30,57 @@ class TokenContextProvider extends Component {
     }
     
     const loginResource = async () => {
-      const checkLogin = await fetch('https://localhost.com/login', {
+      const promise = await fetch('http://127.0.0.1:8000/login', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: { 'username': username, 'password': password }
-    })};
+      }); 
 
-    const response = loginResource();
-    const status = response.json();
+      const response = await promise.json();
+
+      if ((response.loggedIn) && (promise.status_code == 200)) {
+        this.setState({ renderVerifyCredentials: false });
+        this.setSessionAttributes();
+        this.navigate('/home');
+      } else if (promise.status == 400) {
+        this.navigate('/home');
+        
+      } else {
+        this.setState({ renderVerifyCredentials: true });
+      }
+    };
+
+    loginResource();
     
-    if ((status.loggedIn) && (status.status_code == 202)) {
-      this.setState({ renderVerifyCredentials: false });
-      this.setSessionAttributes();
-      this.navigate('/home');
-      
-    } else if (status.status_code == 400) {
-      <Redirect to = { {pathname: '/home', state : { from : props.location } }} /> 
-      
-    } else {
-      this.setState({ renderVerifyCredentials: true });
-    }
   }
 
   logout = ( username ) => {
   
     const logoutResource = async () => {
-      const checkLogin = await fetch('https://localhost.com/logout', {
+      const promise = await fetch('http://127.0.0.1:8000/logout', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: { 'username': username }
-    })};
+      }); 
 
-    const response = logoutResource();
-    const status = response.json();
+      const response = promise.json();
 
-    if (status.status_code == 200) {
-      this.setSessionAttributes();
-      this.navigate('/login');
-    } else {
-      alert('Not able to log you out');
-    }
- 
+      if ((promise.status == 200) || (response.loggedOut)) {
+        this.setSessionAttributes();
+        this.navigate('/login');
+      } else {
+        alert('Not able to log you out');
+      }
+    };
 
+    logoutResource();
+    
   }
 
   render() {
@@ -90,4 +93,4 @@ class TokenContextProvider extends Component {
 
 }
 
-export default TokenContextProvider;
+export default TokenContextProvider; 

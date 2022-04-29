@@ -9,6 +9,7 @@ import '../index.css';
 import TokenContext from '../contexts/TokenContext';
 import Home from './Home';
 import Login from './Login';
+import { AuthContext } from '../contexts/AuthContext';
 
 Chart.register(
   Tooltip, Title, ArcElement, Legend
@@ -18,17 +19,13 @@ function Medicine(props) {
   // check medicine, alerts, dates, and quantities from api 
   const navigate = useNavigate();
   const params = useParams();
-  // const { token, logout, username } = useContext(TokenContext);
-  const [medicine, setMedicine] = useState({'name': 'peptobismol', 'badges': [{'quantity': 10, 'date': '2022-03-30'}, {'quantity': 10, 'date': '2021-05-17'}] });
+  // const { token, logout, username } = useContext(AuthContext);
+
+  const [medicine, setMedicine] = useState({'name': '', 'badges': [] });
   const [retrievedMedicine, setRetrievedMedicine] = useState(false);
-  const token = true; 
-  const username = 'Mateo'; 
+  setTimeout(2000);
 
-  const logout = () => {
-    alert('Logout');
-  }
-
-  if (!token) {
+  if (!props.token) {
     navigate('/login');
   }
 
@@ -39,7 +36,8 @@ function Medicine(props) {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Cookies': document.cookie
       }
     }); 
     
@@ -115,26 +113,7 @@ function Medicine(props) {
   const [verifyDelete, setVerifyDelete] = useState(false);
   const [moreOptions, setMoreOptions] = useState(false);
 
-  const reSetMedicine = () => {
-    const getMedicineResource = async () => {
-      const url = 'https://localhost.com/get-medicine/'.concat(props.match.params.cur_medicine);
-      const promise = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      }); 
-
-      const response = promise.json(); 
-      return response;
-    };
-
-    const status = getMedicineResource();
-    setMedicine(status.medicine);
-   
-    
-  }
+ 
 
   const handleConfirmVerify = () => {
     
@@ -142,11 +121,11 @@ function Medicine(props) {
     if (verifyLogout) {
     
       setVerifyLogout(false);
-      return logout;
+      return props.logout(props.username);
     } else if (verifyDelete) {
         setVerifyDelete(false);
 
-        if (!token) {
+        if (!props.token) {
           navigate('/login');
         }
       
@@ -156,7 +135,8 @@ function Medicine(props) {
             method: 'DELETE',
             headers: {
               'Accept': 'application/json',
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Cookies': document.cookie
             },
   
           });  
@@ -182,7 +162,7 @@ function Medicine(props) {
   const handleEditDate = (date) => {
     alert(date); 
     alert(editDate); 
-    if (!token) {
+    if (!props.token) {
       navigate('/login');
     }
     
@@ -198,7 +178,8 @@ function Medicine(props) {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cookies': document.cookie
         },
         body: JSON.stringify({'medicine_id': params.cur_medicine, 'last': date, 'new': editDate})
         
@@ -224,7 +205,7 @@ function Medicine(props) {
     
     alert(editName); 
 
-    if (!token) {
+    if (!props.token) {
       navigate('/login');
     }
     
@@ -241,13 +222,15 @@ function Medicine(props) {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json', 
+          'Cookies': document.cookie
         },
         body: JSON.stringify({'medicine_id': params.cur_medicine, 'new': editName})
         
       }); 
       const response = await promise.json(); 
-      if ((promise.status != 200) || (response.changedName)) {
+      
+      if ((promise.status != 200) || (!response.changedName)) {
         alert('Not properly changed');
         return; 
       }
@@ -259,6 +242,41 @@ function Medicine(props) {
 
   }
 
+  const handleRemoveExpiredBadges = (event) => {
+   event.preventDefault();
+    
+
+    if (!props.token) {
+      navigate('/login');
+    }
+    
+    
+    const removeExpiredResource = async () => {
+      
+      const url = 'http://127.0.0.1:8000/remove-expired-badges/'.concat(params.cur_medicine);
+      const promise = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json', 
+          'Cookies': document.cookie
+        }
+        
+      }); 
+
+      const response = await promise.json(); 
+      console.log(response);
+      if ((promise.status != 200) || (!response.removedExpired)) {
+        alert('Not properly changed');
+        return; 
+      }
+    };
+
+    removeExpiredResource();
+
+    setRetrievedMedicine(false);
+
+  } 
 
   const closeForms = () => {
     setVerifyLogout(false);
@@ -272,7 +290,7 @@ function Medicine(props) {
       <div className = 'navbar'>
   
         <div className = 'general-information-container'>
-          <img src = '/logo192.png' className = 'logo-image' />
+          <img src = '/gabriel_pastor_logo.png' className = 'logo-image' alt = 'Logo'/>
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
@@ -288,12 +306,13 @@ function Medicine(props) {
             <div className = 'home-profile'>
               <img className = 'nav-option' id = 'home-button' src = '/home_button.png' onClick = { () => navigate('/home') } />
               
-              <img className = 'nav-option' id = 'profile-button' src = '/profile_button.png' onMouseOver = { () => setMoreOptions(true) } /> 
+              
 
-              <div onMouseOver = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } className = { moreOptions ? 'hover-profile' : 'hover-profile-false' }> 
-                <p className = 'profile-user-credentials'> { username } </p>
-                <button onClick = { () => setVerifyLogout(true) } className = 'logout-medicine'> Logout </button>
-              </div> 
+              <h5 className = 'username-attribute'> 
+                { props.username }
+              </h5>
+
+              <button className = 'logout' onClick = { () =>  { setVerifyLogout(true) } } > Logout </button>
 
   
             </div>
@@ -306,7 +325,7 @@ function Medicine(props) {
       <div className = 'main-page'>
 
         <div className = 'medicine-options' >
-          <p className = 'cur-title'> Medicine </p>
+          <p className = 'cur-title'> { medicine.name } </p>
 
 
           <div className = 'options-medicine'>
@@ -316,22 +335,19 @@ function Medicine(props) {
            
           </div>
 
-          <div className = 'options-medicine'>
-            <p> REMOVE EXPIRED BADGES </p>
-            <img onClick = { () => handleRemoveExpiredBadges() } src = 'http://simpleicon.com/wp-content/uploads/refresh.png' className = 'part-title-option' id = 'remove-medicine' /> 
+          
 
-           
-          </div>
+          
         </div>
 
         
         <div className = 'medicine-info'>
           <div className = 'medicine-attributes'>
             <div className = 'med-attribute'> 
-              <p className = 'attribute-name-medicine'> Name </p>
+              <p className = 'attribute-name-medicine'> Change Name </p>
               <div>
                 <input type = 'text' placeholder = { medicine.name } onChange = { e => setEditName(e.target.value) } className = 'attribute-name' required /> 
-                <input type = 'submit' className = 'submit-form' onClick = { () => handleEditName() } /> 
+                <input type = 'submit' className = 'submit-form' onClick = { () => handleEditName() } value = 'Edit' />
               </div>            
             </div>
 
@@ -349,11 +365,11 @@ function Medicine(props) {
               medicine.badges.map(badge => 
 
                 <div className = 'med-attribute'>
-                  <p className = 'attribute-name-medicine'> Expiry Date </p>
+                  <p className = 'attribute-name-medicine'> Change Expiry Date </p>
                   <p className = 'attribute-previous-date'> <i>{ badge.date } </i> </p>
                   <div>
                     <input type = 'date' className = 'attribute-name' required onChange = { e => setEditDate(e.target.value) } /> 
-                    <input type = 'submit' className = 'submit-form' onClick = { () => handleEditDate(badge.date) }></input>
+                    <input type = 'submit' className = 'submit-form' onClick = { () => handleEditDate(badge.date) } value = 'Edit' />
                   </div>
                 </div>
                 
@@ -372,6 +388,19 @@ function Medicine(props) {
         
         </div>
         
+        <div className = 'statistic-options' >
+          <p className = 'cur-title'> <i> { medicine.name } </i> - Statistics </p>
+          
+          <div className = 'options-medicine'>
+            <p> REMOVE EXPIRED BADGES </p>
+            <img onClick = { () => handleRemoveExpiredBadges(event) } src = 'http://simpleicon.com/wp-content/uploads/refresh.png' className = 'part-title-option' id = 'remove-medicine' /> 
+
+           
+          </div>
+
+
+        </div>
+
         <div className = 'statistics'> 
             
           <Pie data = { pie_chart_data }/> 

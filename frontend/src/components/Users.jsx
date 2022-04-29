@@ -4,19 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import ReactDOM from 'react-dom'; 
 import '../index.css';
 import Login from './Login';
+import { AuthContext } from '../contexts/AuthContext';
 
 function Users(props) {
   
-  // const { token, renderModifyUsers, logout, username } = useContext(TokenContext);
+  // const { token, renderModifyUsers, logout, username } = useContext(AuthContext);
   const navigate = useNavigate(); 
-
-  const token = true; 
-  const renderModifyUsers = true; 
-  const logout = () => {
-    alert('hola');
-  }
-
-  const username = 'mateo';
 
   const [usernameAdd, setUsernameAdd] = useState();
   const [usernameRemove, setUsernameRemove] = useState();
@@ -25,57 +18,91 @@ function Users(props) {
   const [moreOptions, setMoreOptions] = useState(false);
   const [verifyRef, setVerifyRef] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+  const [users, setUsers] = useState([]);
+  const [retrievedUsers, setRetrievedUsers] = useState(false);
   const [invalid, setInvalid] = useState(false);
   
+  const getUsers = async () => {
+    
+    
+    const promise = await fetch('http://127.0.0.1:8000/get-users', { 
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Cookies': document.cookie
+  
+      }
+    }); 
+    
+    if (promise.status != 200) {
+      alert('Failed to retrieve users');
+    } 
+
+    const response = await promise.json();
+    
+    setUsers(response.users);
+    
+  }
+  
+  if (!retrievedUsers) {
+    getUsers(); 
+    setRetrievedUsers(true);
+  }
   const addUserCredentials = (event) => {
     event.preventDefault();
-    alert(usernameAdd);
-    alert(password); 
-    alert(level);
-    if (!token) {
+    
+    if (!props.token) {
       navigate('/login');
     }
     
-    if ((!usernameAdd) || (!password) || (!level) || (!renderModifyUsers)) {
+    if ((!usernameAdd) || (!password) || (!props.renderModifyUsers)) {
       alert('Invalid data or credentials');
       return;
     }
 
     // make post request to api with attributes
     const addUserResource = async () => {
+      
       const promise = await fetch('http://127.0.0.1:8000/add-user', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cookies': document.cookie
         },
         body: JSON.stringify({ 'username' : usernameAdd, 'password': password, 'level': level })
       }); 
 
-
+      
       const response = await promise.json(); 
       
       if ((!response.addedUser) || (promise.status != 200)) {
         setInvalid(true);
+         
       } else {
         setInvalid(false);
+        
       }
       
     };
-
-    addUserResource(); 
-
+    
+    addUserResource();
+    setUsernameAdd();
+    setPassword();
+    setLevel(false);
+    setRetrievedUsers(false); 
+    
 
   }
 
   const removeUserCredentials = (event) => {
     event.preventDefault();
-    alert(usernameRemove);
-    if (!token) {
+
+    if (!props.token) {
       navigate('/login');
     }
-    if ((!usernameRemove) || (!renderModifyUsers)) {
+     
+    if ((!usernameRemove) || (!props.renderModifyUsers)) {
       alert('Invalid data or credentials');
       return; 
     }
@@ -85,7 +112,8 @@ function Users(props) {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cookies': document.cookie
         },
         body: JSON.stringify({ 'username' : usernameRemove })
       }); 
@@ -101,6 +129,8 @@ function Users(props) {
     };
 
     removeUserResource(); 
+    setUsernameRemove();
+    setRetrievedUsers(false);
 
     
 
@@ -112,7 +142,7 @@ function Users(props) {
       <div className = 'navbar'>
   
         <div className = 'general-information-container'>
-          <img src = '/logo192.png' className = 'logo-image' />
+          <img src = 'gabriel_pastor_logo.png' className = 'logo-image' />
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
@@ -128,18 +158,13 @@ function Users(props) {
             <div className = 'home-profile'>
               <img className = 'nav-option' id = 'home-button' src = '/home_button.png' onClick = { () => navigate('/home') } /> 
 
-              <img className = 'nav-option' id = 'profile-button' src = '/profile_button.png' onMouseOver = { () => setMoreOptions(true) }  />
-              
-              <div className = { moreOptions ? 'hover-profile' : 'hover-profile-false' } onMouseOver = { () => setMoreOptions(true) } onMouseOut = { () => setMoreOptions(false) } >
-                <p className = 'profile-user-credentials'> { username } </p>
-                <button className = 'logout' onClick = { () => setVerifyRef(true) } > Logout </button>
-              </div>
-               
-              
+              <h5 className = 'username-attribute'> 
+                { props.username }
+              </h5>
 
-              
-              
-              
+              <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
+               
+   
             </div>
 
           </div>
@@ -163,14 +188,14 @@ function Users(props) {
               <img className = { showPassword ? 'show-password-button' : 'password-image-false' } src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXMz0uM0TFgQDWUQc1vPMDbbusXNoOoNWOMIcCjc3o7egKnrj5gYXcxx86DPutraU24Kw&usqp=CAU' onClick = { () => setShowPassword(false)}/>
             </div>
             <div>
-              <input type="radio" id="chief"
+              <input name = 'level' type="radio" 
                      required onChange = { () => setLevel(true) }/>
-              <label for="chief">Chief</label>
+              <label>Chief</label>
             </div>
 
             <div>
-              <input type="radio" id="employee" required onChange = { () => setLevel(false) }/>
-              <label for="employee">Employee</label>
+              <input name = 'level' type="radio" required onChange = { () => setLevel(false) }/>
+              <label >Employee</label>
             </div>
     
             <div>
@@ -192,8 +217,32 @@ function Users(props) {
           </form>
           
         </div>
+
+        <div>
+          <p className = 'all-users-title'>
+            All registered users
+          </p>
+      
+          <div>
+            {
+              users.map(user => {
+                return (
+                <ul>
+                  <li> 
+                    { user }
+                  </li>
+                </ul>
+                );
+              })
+            }
+          </div> 
+            
+        </div>
+
+        
     
       </div>
+      
 
       <p className = { invalid ? 'invalid-remove-credential' : 'invalid-remove-credential-false'} >
         The credentials you entered either already exist
@@ -209,7 +258,7 @@ function Users(props) {
         <h5> Are you sure you want to do this? <br /> You can't undo this action </h5>
     
         <div className = 'verifying-buttons'>
-          <button className = 'submit-form' id = 'verify-yes' onClick = { () => logout(username) } >
+          <button className = 'submit-form' id = 'verify-yes' onClick = { () => props.logout(props.username) } >
               YES
           </button>
     

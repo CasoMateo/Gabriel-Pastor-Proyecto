@@ -5,20 +5,22 @@ import Login from '../components/Login';
 import Home from '../components/Home';
 import Users from '../components/Users';
 import Medicine from '../components/Medicine';
+import AuthContextProvider from '../contexts/AuthContext';
 
-function ProtectedRoute(user_level) {
+function ProtectedRoute(props) {
   // const { token, renderModifyUsers } = useContext(TokenContext);
 
-  return (
 
+  return (
+    
     <Router> 
       <Routes>
         
-        <Route path = '/home' element = {<Home />}  /> 
-        <Route path = '/medicine/:cur_medicine' element = {<Medicine />}  /> 
+        <Route path = '/home' element = { <Home token = { props.token } renderModifyUsers = { props.user_level } username = { props.username} logout = { props.logout }/> } /> 
+        <Route path = '/medicine/:cur_medicine' element = { <Medicine token = { props.token } renderModifyUsers = { props.user_chief } username = { props.username} logout = { props.logout }/> }  /> 
 
         
-        { user_level && <Route exact path="/users" element = { <Users /> } /> }
+        { props.user_level && <Route exact path="/users" element = { <Users token = { props.token } renderModifyUsers = { props.user_level } username = { props.username} logout = { props.logout }/>  } /> }
         
         <Route path = '*' element = { <Navigate to = '/home' /> }/>
       </Routes>
