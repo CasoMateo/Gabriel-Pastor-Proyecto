@@ -27,7 +27,7 @@ app.add_middleware(
   allow_headers=["*"],
 )
 
-cluster = MongoClient("mongodb+srv://InventoryManager:CasMat2*<>@proyectogabrielpastor.hfvj9.mongodb.net/InventoryManagement?retryWrites=true&w=majority")
+cluster = MongoClient()
 db = cluster['InventoryManagement']
 medicines = db['medicines']
 users = db['users'] 
