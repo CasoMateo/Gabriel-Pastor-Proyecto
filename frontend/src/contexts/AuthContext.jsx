@@ -20,43 +20,24 @@ const AuthContextProvider = (props) => {
       return false;
     } 
 
-    /*
+    let status = getCookie('session_id');
+    
+    fetch('http://127.0.0.1:8000/is-logged-in', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json', 
+        'mode': 'cors',
+        'Cookies': document.cookie
+      }
+    }).then(response => status = (response.status == 200)); 
 
-    let user_status = loggedInResource();
-    console.log(resolve(user_status));
-    if (user_status == 200) {
-      user_status = true;
-    } else {
-      user_status = false;
-    } */
-
-    const [token, setToken] = useState(getCookie('session_id'));
+    const [token, setToken] = useState(status);
     const [renderModifyUsers, setRenderModifyUsers] = useState(getCookie('user_chief')); 
     const [renderVerifyCredentials, setRenderVerifyCredentials] = useState(false);
     const [username, setUsername] = useState(getCookie('username'));
-  
-    const loggedInResource = async () => {
-      const promise = await fetch('http://127.0.0.1:8000/is-logged-in', {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json', 
-          'mode': 'cors',
-          'Cookies': document.cookie
-        }
-      }); 
-      
-      if (promise.status == 200) {
-        setToken(true);
-      } else {
-        setToken(false);
-      } 
-
+    console.log(token);
     
-    };
-
-    loggedInResource();
-
     const login = (username, password) => {
       if ((!username) || (!password)) {
         setRenderVerifyCredentials(true);

@@ -15,7 +15,7 @@ function Login(props) {
   return (
     <div>
       <div className="imgcontainer">
-        <img src="gabriel_pastor_logo.png" alt="Logo" className="logo-image"/>       
+        <img src="gabriel_pastor_logo.png" alt="Logo" className="logo-image-form"/>       
       </div>
       
       <div>

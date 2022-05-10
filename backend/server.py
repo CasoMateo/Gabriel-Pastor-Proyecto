@@ -86,7 +86,7 @@ def authenticatedUser(session_id, username):
     return False
   
   user = users.find_one({ 'username': username })
-
+  
   if not user: 
     return False 
     
@@ -97,7 +97,7 @@ def authenticatedUser(session_id, username):
     return False 
 
   if 'session_id' not in user.keys(): 
-    return False 
+    return False  
      
   if user['session_id'] != session_id: 
     return False 
@@ -153,13 +153,13 @@ def login(request: Request, checkUser: User, session_id: Optional[str] = Cookie(
 
 @app.get("/is-logged-in", status_code = 200)
 def isLoggedIn(request: Request):
-  
+
   if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
     raise HTTPException(status_code=401, detail="Unauthorized") 
-
+ 
   pass 
 
-
+ 
 @app.post("/logout", status_code = 200)
 def logout(request: Request, user: findUser, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
 
@@ -206,7 +206,7 @@ def addUser(request: Request, user: User, session_id: Optional[str] = Cookie(Non
       users.insert_one(newUser)
       content['addedUser'] = True 
       
-  if not content['addedUser']: 
+  if not content['addedUser']:
     raise HTTPException(status_code=400, detail="Invalid request")
   
   return JSONResponse(content = content)
@@ -250,7 +250,7 @@ username: Optional[str] = Cookie(None)):
 
   if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
     raise HTTPException(status_code=401, detail="Unauthorized") 
-
+  
   content = {}
   
   content['medicine'] = medicines.find_one({ '_id': ObjectId(medicineID) })
@@ -289,7 +289,7 @@ username: Optional[str] = Cookie(None)):
   
   content = {'addedTo': False}
   medicine = medicines.find_one({'_id': ObjectId(attributes.medicine_id)})
-  if attributes.quantity > 0 and attributes.expiry:
+  if attributes.quantity > 0 and attributes.expiry and not expiredDate(attributes.expiry):
 
     for badge in range(len(medicine['badges'])): 
       if medicine['badges'][badge]['date'] == attributes.expiry: 
@@ -392,7 +392,7 @@ username: Optional[str] = Cookie(None)):
   if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
     raise HTTPException(status_code=401, detail="Unauthorized") 
 
-  if not date.new or not date.last: 
+  if not date.new or not date.last or expiredDate(date.new): 
     raise HTTPException(status_code=400, detail="Invalid request") 
     
   content = {'changedDate': False}

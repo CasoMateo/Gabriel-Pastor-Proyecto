@@ -17,7 +17,7 @@ function ProtectedRoute(props) {
       <Routes>
         
         <Route path = '/home' element = { <Home token = { props.token } renderModifyUsers = { props.user_level } username = { props.username} logout = { props.logout }/> } /> 
-        <Route path = '/medicine/:cur_medicine' element = { <Medicine token = { props.token } renderModifyUsers = { props.user_chief } username = { props.username} logout = { props.logout }/> }  /> 
+        <Route path = '/medicine/:cur_medicine' element = { <Medicine token = { props.token } renderModifyUsers = { props.user_level } username = { props.username} logout = { props.logout }/> }  /> 
 
         
         { props.user_level && <Route exact path="/users" element = { <Users token = { props.token } renderModifyUsers = { props.user_level } username = { props.username} logout = { props.logout }/>  } /> }

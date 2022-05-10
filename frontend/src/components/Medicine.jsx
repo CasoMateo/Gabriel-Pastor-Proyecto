@@ -23,7 +23,9 @@ function Medicine(props) {
 
   const [medicine, setMedicine] = useState({'name': '', 'badges': [] });
   const [retrievedMedicine, setRetrievedMedicine] = useState(false);
-  setTimeout(2000);
+  const [showMenu, setShowMenu] = useState(true);
+  const [curView, setCurView] = useState(false);
+  
 
   if (!props.token) {
     navigate('/login');
@@ -43,7 +45,7 @@ function Medicine(props) {
     
     const response = await promise.json();
     
-
+    console.log(response.medicine);
     if ((!response.medicine) || (promise.status != 200)) {
       alert('Error retrieving medicine');
       
@@ -160,8 +162,7 @@ function Medicine(props) {
  
  
   const handleEditDate = (date) => {
-    alert(date); 
-    alert(editDate); 
+    
     if (!props.token) {
       navigate('/login');
     }
@@ -189,22 +190,28 @@ function Medicine(props) {
 
       if ((promise.status != 200) || (!response.changedDate)){
         alert('Not properly changed');
-        return; 
+        
+      } else {
+        const copy = JSON.parse(JSON.stringify(medicine));
+        copy.badges.forEach(badge => {
+          if (badge.date == date) {
+            badge.date = editDate;
+          }
+        }); 
+        console.log(copy);
+        setMedicine(copy);
       }
       
     };
 
     editDateResource();
-
-    setRetrievedMedicine(false);
+    setEditDate();
     
   }
 
 
   const handleEditName = () => {
     
-    alert(editName); 
-
     if (!props.token) {
       navigate('/login');
     }
@@ -232,13 +239,16 @@ function Medicine(props) {
       
       if ((promise.status != 200) || (!response.changedName)) {
         alert('Not properly changed');
-        return; 
+        
+      } else {
+        const copy = JSON.parse(JSON.stringify(medicine)); 
+        copy.name = editName; 
+        setMedicine(copy);
       }
     };
 
     editNameResource();
-
-    setRetrievedMedicine(false);
+    setEditName();
 
   }
 
@@ -268,13 +278,12 @@ function Medicine(props) {
       console.log(response);
       if ((promise.status != 200) || (!response.removedExpired)) {
         alert('Not properly changed');
-        return; 
+      } else {
+        setRetrievedMedicine(false);
       }
     };
 
     removeExpiredResource();
-
-    setRetrievedMedicine(false);
 
   } 
 
@@ -287,67 +296,67 @@ function Medicine(props) {
   return (
  
     <div>
-      <div className = 'navbar'>
+      <div className = 'navbar-test'>
   
         <div className = 'general-information-container'>
-          <img src = '/gabriel_pastor_logo.png' className = 'logo-image' alt = 'Logo'/>
+          <img src = '/gabriel_pastor_logo.png' className = 'logo-image' />
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
-              Nursing Home Name 
-              <br /> 
-              This is their slogan
+              Gabriel Pastor 
+              <br />
+              Foundation
             </h5>
           </div> 
         </div>
 
-        <div className = 'navbar-buttons'>
-          <div className = 'action-navbar'>
+        <div>
+          <div>
             <div className = 'home-profile'>
-              <img className = 'nav-option' id = 'home-button' src = '/home_button.png' onClick = { () => navigate('/home') } />
+              <img className = {props.renderModifyUsers ? 'nav-option'  : 'home-button-false' } src = '/home_button.png' onClick = { () => navigate('/home') }/> 
+          
               
-              
-
-              <h5 className = 'username-attribute'> 
-                { props.username }
+              <h5 className = { props.renderModifyUsers ? 'add-remove-user' : 'add-remove-user-false' } onClick = { () => navigate('/users') }> 
+                Add/Remove User
               </h5>
 
-              <button className = 'logout' onClick = { () =>  { setVerifyLogout(true) } } > Logout </button>
-
-  
+              
+              
             </div>
+
+          </div>
+          <div className = 'switch-page-medicine'>
+            <p className = 'switch-page-value' onClick = { () => setCurView(false) } id = { !curView && 'selected-page-option'}> Attributes </p> 
+            <p className = 'switch-page-value' onClick = { () => setCurView(true) } id = { curView && 'selected-page-option'}> Statistics </p> 
+
+            <p className = 'switch-page-value' id = { !showMenu && 'selected-page-option' }onClick = { () => setShowMenu(!showMenu) }> { showMenu ? 'Hide' : 'Show' } menu </p>
           </div>
 
+          <div className = 'navbar-options'>   
+
+            <img className = { !props.renderModifyUsers ? 'home-button' : 'home-button-false'} src = '/home_button.png' onClick = { () => navigate('/home') } /> 
+            <h5 className = 'username-attribute'> 
+              { props.username }
+            </h5>
+
+            <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
+          </div> 
         </div>
+          
+
+        
+
+        
 
       </div> 
 
-      <div className = 'main-page'>
-
-        <div className = 'medicine-options' >
-          <p className = 'cur-title'> { medicine.name } </p>
-
-
-          <div className = 'options-medicine'>
-            <p> REMOVE MED. </p>
-            <img onClick = { () => setVerifyDelete(true) } src = '/trash_button.png' className = 'part-title-option' id = 'remove-medicine' /> 
-
-           
-          </div>
-
-          
-
-          
-        </div>
-
-        
-        <div className = 'medicine-info'>
+      <div className = 'main-page' id = 'medicine-body'>
+        <div className = { !curView ? 'medicine-info' : 'page-not-exist' } >
           <div className = 'medicine-attributes'>
             <div className = 'med-attribute'> 
-              <p className = 'attribute-name-medicine'> Change Name </p>
               <div>
                 <input type = 'text' placeholder = { medicine.name } onChange = { e => setEditName(e.target.value) } className = 'attribute-name' required /> 
-                <input type = 'submit' className = 'submit-form' onClick = { () => handleEditName() } value = 'Edit' />
+                <input type = 'submit' className = 'submit-form' onClick = { () => handleEditName() } value = 'Edit name' />
               </div>            
             </div>
 
@@ -364,12 +373,11 @@ function Medicine(props) {
             { 
               medicine.badges.map(badge => 
 
-                <div className = 'med-attribute'>
-                  <p className = 'attribute-name-medicine'> Change Expiry Date </p>
+                <div key = { badge.date } className = 'med-attribute'>
                   <p className = 'attribute-previous-date'> <i>{ badge.date } </i> </p>
                   <div>
                     <input type = 'date' className = 'attribute-name' required onChange = { e => setEditDate(e.target.value) } /> 
-                    <input type = 'submit' className = 'submit-form' onClick = { () => handleEditDate(badge.date) } value = 'Edit' />
+                    <input type = 'submit' className = 'submit-form' onClick = { () => handleEditDate(badge.date) } value = 'Replace'/>
                   </div>
                 </div>
                 
@@ -387,25 +395,14 @@ function Medicine(props) {
 
         
         </div>
-        
-        <div className = 'statistic-options' >
-          <p className = 'cur-title'> <i> { medicine.name } </i> - Statistics </p>
-          
-          <div className = 'options-medicine'>
-            <p> REMOVE EXPIRED BADGES </p>
-            <img onClick = { () => handleRemoveExpiredBadges(event) } src = 'http://simpleicon.com/wp-content/uploads/refresh.png' className = 'part-title-option' id = 'remove-medicine' /> 
 
-           
-          </div>
+        <div className = { curView ? 'statistics' : 'page-not-exist' }> 
+          { 
+          (dates.length == 0) ?
+          <div className = 'message-no-data'> No units for this medicine </div> : 
+          <Pie data = { pie_chart_data } onMouseOver = { () => setShowMenu(false) } onMouseOut = { () => setShowMenu(true) }/>
+          }
 
-
-        </div>
-
-        <div className = 'statistics'> 
-            
-          <Pie data = { pie_chart_data }/> 
-
-        
         </div>
         
       </div>
@@ -428,7 +425,21 @@ function Medicine(props) {
         </div>
       </div>
 
+      <div className = { showMenu ? 'inventory-options' : 'inventory-options-false' }>
+        <div onClick = { () => setVerifyDelete(true) } className = 'inventory-option' id = 'remove-medicine-part'>
+          <p> REMOVE MED. </p>
+          <img src = '/trash_button.png' className = 'part-title-option'/> 
+        </div>
+
+        <div onClick = { () => handleRemoveExpiredBadges(event) } className = 'inventory-option'>
+          <p> REMOVE EXPIRED </p>
+          <img src = 'http://simpleicon.com/wp-content/uploads/refresh.png' className = 'part-title-option' />
+        </div>
+      </div> 
+      
     </div>
+
+    
     
   );
 
