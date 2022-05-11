@@ -91,15 +91,15 @@ def authenticatedUser(session_id, username):
     return False 
     
   if not session_id: 
-    if user['session_id']: 
+    if user.get('session_id'): 
       clearSessionFromDatabase(username)
 
     return False 
 
-  if 'session_id' not in user.keys(): 
+  if not user.get('session_id'): 
     return False 
      
-  if user['session_id'] != session_id: 
+  if user.get('session_id') != session_id: 
     return False 
 
   return True
@@ -110,7 +110,7 @@ def authorizedUserChief(username, user_chief):
     return False
 
   user = users.find_one({ 'username': username })
-  if not user['level']: 
+  if not user.get('level'): 
     return False 
 
   return True
@@ -130,10 +130,10 @@ def login(request: Request, checkUser: User, session_id: Optional[str] = Cookie(
     user = users.find_one({ 'username': checkUser.username })
     
     if user: 
-      if bcrypt.hashpw(checkUser.password.encode('utf8'), user['password']) == user['password']: 
+      if bcrypt.hashpw(checkUser.password.encode('utf8'), user.get('password')) == user.get('password'): 
         content['loggedIn'] = True
         
-        if user['level']: 
+        if user.get('level'): 
           content['level'] = True
       
   if not content['loggedIn']: 
@@ -184,7 +184,7 @@ def getUsers(request: Request):
   all_users = [user for user in users.find()]
   
   for user in all_users: 
-    usernames.append(user['username'])
+    usernames.append(user.get('username'))
   
   content = { 'users': usernames }
   response = JSONResponse(content = content) 
@@ -330,7 +330,6 @@ username: Optional[str] = Cookie(None)):
         if medicine['badges'][badge]['quantity'] == attributes.quantity: 
           medicine['badges'] = medicine['badges'][: badge] + medicine['badges'][badge + 1: ] 
           
-
         else:
           medicine['badges'][badge]['quantity'] -= attributes.quantity 
         

@@ -5,7 +5,6 @@ import datetime
 app = FastAPI()
 client = TestClient(app) 
 
-
 def test_add_user():
   response = client.get('/add-user', headers = {'Accept': 'application/json', 
   'Content-Type': 'application/json', 
@@ -70,4 +69,12 @@ def test_remove_expired_date():
   response = client.delete('/remove-expired-badges', headers = {'Accept': 'application/json', 'Content-Type': 'application/json', 'Cookie': 'session_id=valid_id,username:MateoCaso'}) 
 
   assert response.status_code == 200
-  assert response.json() == { 'removedExpired': True }
+  assert response.json() == { 'removedExpired': True } 
+
+def test_expired_date(): 
+  response = expiredDate('2022-04-23') 
+  assert response == True 
+
+def test_get_cookie(): 
+  response = getCookie('username', 'username=Username;session_id:434224325253iu512po531fq;user_chief=True')
+  assert response == 'Username'

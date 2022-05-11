@@ -4,31 +4,21 @@ export const AuthContext = createContext();
 import { BrowserRouter as Router, Link, Redirect, Route, RouteComponentProps, withRouter } from 'react-router-dom';
 
 const AuthContextProvider = (props) => {
-    function getCookie(cname) {
-      let name = cname + "=";
+    function getCookie(cookie_name) {
+      let name = cookie_name + "=";
       let decodedCookie = decodeURIComponent(document.cookie);
-      let ca = decodedCookie.split(';');
-      for(let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) == ' ') {
-          c = c.substring(1);
+      let cookies = decodedCookie.split(';');
+      for(let i = 0; i <cokies.length; i++) {
+        let cur_cookie = cookies[i];
+        while (cur_cookie.charAt(0) == ' ') {
+          cur_cookie = cur_cookie.substring(1);
         }
-        if (c.indexOf(name) == 0) {
-          return c.substring(name.length, c.length);
+        if (cur_cokie.indexOf(name) == 0) {
+          return cur_cookie.substring(name.length, cur_cokie.length);
         }
       }
       return false;
     } 
-
-    /*
-
-    let user_status = loggedInResource();
-    console.log(resolve(user_status));
-    if (user_status == 200) {
-      user_status = true;
-    } else {
-      user_status = false;
-    } */
 
     const [token, setToken] = useState(getCookie('session_id'));
     const [renderModifyUsers, setRenderModifyUsers] = useState(getCookie('user_chief')); 
