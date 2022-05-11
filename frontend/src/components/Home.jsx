@@ -11,29 +11,6 @@ import { AuthContext } from '../contexts/AuthContext';
 
 
 function Home(props) { 
-  // check reset alerts logic 
-  // update alerts on logout
-  // check action after submitting form (closing it)
-  // check add medicine form, alerts iteration 
- 
-  // replantear lógica
-  function getCookie(cname) {
-    let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i <ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        return c.substring(name.length, c.length);
-      }
-    }
-    return false;
-  } 
-  // const { token, renderModifyUsers, logout, username } = useContext(AuthContext);
-  setTimeout(2000);
  
   const navigate = useNavigate(); 
   
