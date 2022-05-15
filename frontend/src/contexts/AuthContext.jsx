@@ -8,13 +8,13 @@ const AuthContextProvider = (props) => {
       let name = cookie_name + "=";
       let decodedCookie = decodeURIComponent(document.cookie);
       let cookies = decodedCookie.split(';');
-      for(let i = 0; i <cokies.length; i++) {
+      for(let i = 0; i <cookies.length; i++) {
         let cur_cookie = cookies[i];
         while (cur_cookie.charAt(0) == ' ') {
           cur_cookie = cur_cookie.substring(1);
         }
-        if (cur_cokie.indexOf(name) == 0) {
-          return cur_cookie.substring(name.length, cur_cokie.length);
+        if (cur_cookie.indexOf(name) == 0) {
+          return cur_cookie.substring(name.length, cur_cookie.length);
         }
       }
       return false;
@@ -26,17 +26,17 @@ const AuthContextProvider = (props) => {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json', 
+        'Content-Type': 'application/json',  
         'mode': 'cors',
         'Cookies': document.cookie
       }
     }).then(response => status = (response.status == 200)); 
 
-    const [token, setToken] = useState(status);
+    const [token, setToken] = useState(false);
     const [renderModifyUsers, setRenderModifyUsers] = useState(getCookie('user_chief')); 
     const [renderVerifyCredentials, setRenderVerifyCredentials] = useState(false);
     const [username, setUsername] = useState(getCookie('username'));
-    console.log(token);
+    
     
     const login = (username, password) => {
       if ((!username) || (!password)) {

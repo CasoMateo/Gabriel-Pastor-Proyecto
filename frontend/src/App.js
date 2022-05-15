@@ -7,7 +7,6 @@ import Users from './components/Users';
 import Medicine from './components/Medicine';
 import Error404 from './errors/error404'
 import AuthContextProvider, { AuthContext } from './contexts/AuthContext';
-import TokenContextProvider from './contexts/TokenContext';
 import ProtectedRoute from './routes/ProtectedRoutes';
 import UnprotectedRoute from './routes/UnprotectedRoutes';
 

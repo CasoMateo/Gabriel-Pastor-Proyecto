@@ -1,7 +1,6 @@
 import React, { Component, useState, useContext, useEffect } from 'react';
 import ReactDOM from 'react-dom'; 
 import '../index.css';
-import TokenContext from '../contexts/TokenContext';
 import { AuthContext } from '../contexts/AuthContext';
 
 function Login(props) {

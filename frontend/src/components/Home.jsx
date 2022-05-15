@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useContext, Component } from 'react
 import ReactDOM from 'react-dom'; 
 import { useNavigate } from 'react-router-dom';
 import '../index.css';
-import TokenContext from '../contexts/TokenContext';
 import Users from './Users';
 import Medicine from './Medicine';
 import Login from './Login';
@@ -12,22 +11,9 @@ import { AuthContext } from '../contexts/AuthContext';
 
 function Home(props) { 
  
+  setTimeout(2000);
   const navigate = useNavigate(); 
   
-  const loggedInResource = async () => {
-    const promise = await fetch('http://127.0.0.1:8000/is-logged-in', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json', 
-        'mode': 'cors',
-        'Cookies': document.cookie
-      }
-    }); 
-    alert(promise.status);
-    return (promise.status == 200);
-  };
-
   if (!props.token) {
     navigate('/login');
   }

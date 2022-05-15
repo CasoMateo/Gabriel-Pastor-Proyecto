@@ -6,7 +6,6 @@ import { Pie } from 'react-chartjs-2';
 import ReactDOM from 'react-dom'; 
 import { useNavigate, useParams } from 'react-router-dom';
 import '../index.css';
-import TokenContext from '../contexts/TokenContext';
 import Home from './Home';
 import Login from './Login';
 import { AuthContext } from '../contexts/AuthContext';
@@ -45,7 +44,7 @@ function Medicine(props) {
     
     const response = await promise.json();
     
-    console.log(response.medicine);
+    
     if ((!response.medicine) || (promise.status != 200)) {
       alert('Error retrieving medicine');
       
@@ -198,7 +197,7 @@ function Medicine(props) {
             badge.date = editDate;
           }
         }); 
-        console.log(copy);
+        
         setMedicine(copy);
       }
       
