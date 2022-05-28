@@ -299,7 +299,7 @@ function Home(props) {
 
   return (
     <div>
-      <div className = 'navbar-test'>
+      <div className = 'navbar-test' id = { (addMedicineForm || addToMedicineForm || subsToMedicineForm || verifyRef ) && 'form-displayed'}>
   
         <div className = 'general-information-container'>
           <img src = 'gabriel_pastor_logo.png' className = 'logo-image' />
@@ -346,7 +346,7 @@ function Home(props) {
 
       </div> 
 
-      <div className = 'main-page'>
+      <div className = 'main-page' id = { (addMedicineForm || addToMedicineForm || subsToMedicineForm || verifyRef ) && 'form-displayed'}>
         
         { medicines.length != 0 &&
         <div className = 'medicine-headers'>

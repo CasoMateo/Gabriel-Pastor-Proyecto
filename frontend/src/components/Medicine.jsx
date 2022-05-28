@@ -295,7 +295,7 @@ function Medicine(props) {
   return (
  
     <div>
-      <div className = 'navbar-test'>
+      <div className = 'navbar-test' id = { (verifyLogout || verifyDelete ) && 'form-displayed'}>
   
         <div className = 'general-information-container'>
           <img src = '/gabriel_pastor_logo.png' className = 'logo-image' />
@@ -349,7 +349,7 @@ function Medicine(props) {
 
       </div> 
 
-      <div className = 'main-page' id = 'medicine-body'>
+      <div className = 'main-page' id = { (verifyLogout || verifyDelete ) ? 'form-displayed-medicine' : 'medicine-body'}>
         <div className = { !curView ? 'medicine-info' : 'page-not-exist' } >
           <div className = 'medicine-attributes'>
             <div className = 'med-attribute'> 

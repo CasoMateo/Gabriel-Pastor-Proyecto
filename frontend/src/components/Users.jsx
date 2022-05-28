@@ -139,7 +139,7 @@ function Users(props) {
   return (
     <div>
       
-      <div className = 'navbar-test'>
+      <div className = 'navbar-test' id = { verifyRef && 'form-displayed'}>
   
         <div className = 'general-information-container'>
           <img src = '/gabriel_pastor_logo.png' className = 'logo-image' />
@@ -185,7 +185,7 @@ function Users(props) {
 
       </div> 
 
-      <div className = 'main-page' id = 'user-manipulation'>
+      <div className = 'main-page' id = { verifyRef ? 'form-displayed-user' : 'user-manipulation' } >
         <div>
           <p className = 'manipulate-user-title'>
             Add User

@@ -377,6 +377,14 @@ img.avatar {
   width: 2em;
 }
 
+#form-displayed {
+  opacity: 50%;
+}
+
+#form-displayed-medicine {
+  opacity: 50%;
+  padding-top: 5%
+}
 
 .password-image-false {
   display: none;
@@ -863,6 +871,13 @@ ul {
 
 #verify-yes {
   margin-right: 1em;
+}
+
+#form-displayed-user {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 10%;
+  opacity: 50%;
 }
 
 #user-manipulation {

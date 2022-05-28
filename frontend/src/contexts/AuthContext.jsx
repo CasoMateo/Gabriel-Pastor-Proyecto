@@ -32,7 +32,7 @@ const AuthContextProvider = (props) => {
       }
     }).then(response => status = (response.status == 200)); 
 
-    const [token, setToken] = useState(false);
+    const [token, setToken] = useState(status);
     const [renderModifyUsers, setRenderModifyUsers] = useState(getCookie('user_chief')); 
     const [renderVerifyCredentials, setRenderVerifyCredentials] = useState(false);
     const [username, setUsername] = useState(getCookie('username'));

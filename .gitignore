@@ -1,2 +1,4 @@
 node_modules
-_pycache 
+*.env
+*/*.pyc
+backend/backend
