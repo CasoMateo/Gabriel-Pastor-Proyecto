@@ -1,19 +1,19 @@
-
-from typing import Optional
-from fastapi import Cookie, FastAPI, HTTPException, Request
-from fastapi.testclient import TestClient
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from pymongo import MongoClient
+import os
+import json
 import bcrypt
 import datetime
+
 from uuid import uuid4
-from bson import json_util, ObjectId
-import json
+from typing import Optional
+
 from bson.binary import UUID
-import os
-from dotenv import load_dotenv, find_dotenv
+from pydantic import BaseModel
+from pymongo import MongoClient
+from bson import json_util, ObjectId
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Cookie, FastAPI, HTTPException, Request
+
 
 # checar response model
 app = FastAPI()
@@ -30,8 +30,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-load_dotenv('../frontend/.env')
-cluster = MongoClient(os.getenv("CONNECTION_TO_DB"))
+NOSQL_USER = os.environ.get('NOSQL_USER', '')
+NOSQL_PASS = os.environ.get('NOSQL_PASS', '')
+NOSQL_HOST = os.environ.get('NOSQL_HOST', '')
+NOSQL_PORT = os.environ.get('NOSQL_PORT', 27050)
+
+
+def get_mongo_url():
+    ''' Returns proper mongo connection URL from env file. '''
+    # CLOUD
+    # return f''
+    # local
+    return f'mongodb://{NOSQL_HOST}:{NOSQL_PORT}/'
+
+
+cluster = MongoClient(
+    get_mongo_url(),
+    username=NOSQL_USER,
+    password=NOSQL_PASS
+)
 db = cluster['InventoryManagement']
 medicines = db['medicines']
 users = db['users']
@@ -116,7 +133,6 @@ def authenticatedUser(session_id, username):
 
 
 def authorizedUserChief(username, user_chief):
-
     if not user_chief:
         return False
 
@@ -170,15 +186,13 @@ def isLoggedIn(request: Request):
     if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    pass
-
 
 @app.post("/logout", status_code=200)
 def logout(request: Request, user: findUser, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
 
     if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
         raise HTTPException(status_code=401, detail="Unauthorized")
-       # check if given header cookies match database cookies
+      # check if given header cookies match database cookies
     if not users.find_one_and_update({'username': user.username}, {'$unset': {'session_id': ''}}):
         raise HTTPException(status_code=400, detail="Invalid request")
 
@@ -192,7 +206,7 @@ def getUsers(request: Request):
 
     if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])) or not authorizedUserChief(getCookie('username', request.headers['cookies']), getCookie('user_chief', request.headers['cookies'])):
         raise HTTPException(status_code=401, detail="Unauthorized")
-       # check if given header cookies match database cookies
+      # check if given header cookies match database cookies
 
     usernames = []
     all_users = [user for user in users.find()]

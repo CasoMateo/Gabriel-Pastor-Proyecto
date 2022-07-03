@@ -1,0 +1,11 @@
+pymongo
+dnspython
+pymongo[srv]
+fastapi
+datetime
+bcrypt
+pydantic
+uvicorn
+requests
+uuid
+python-dotenv
