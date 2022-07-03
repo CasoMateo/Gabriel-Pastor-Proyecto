@@ -1,4 +1,4 @@
 node_modules
 *.env
-*/*.pyc
-backend/backend
+*.pyc
+_pycache

@@ -17,8 +17,6 @@ const AuthContextProvider = (props) => {
           return cur_cookie.substring(name.length, cur_cookie.length);
         }
       }
-      return false;
-    } 
 
     let status = getCookie('session_id');
     
