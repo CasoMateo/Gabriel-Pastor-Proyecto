@@ -2,19 +2,30 @@
   display: none;
 }
 
-body {
-  margin-top: 10%;
-}
-
 .medicine-name {
   margin-left: 30%;
 }
+
 
 .medicine-name:hover {
   opacity: 70%; 
   cursor: pointer;
 }
 
+.home-button {
+  width: 33px;
+  height: 33px;
+  padding-bottom: .2em;
+}
+
+.home-button-false {
+  display: none;
+}
+
+.home-button:hover {
+  opacity: 75%; 
+  cursor: pointer;
+}
 
 .image-404 {
   width: 30%;
@@ -66,7 +77,85 @@ input[type=text], input[type=password] {
 }
 
 .main-page {
-  margin: 0;
+  padding-top: 1em;
+  margin-left: 16%;
+}
+
+
+#selected-page-option {
+  color: black;
+}
+
+#medicine-body {
+  padding-top: 5%;
+}
+
+.medicine-list-root {
+  position: absolute;
+  width: 80%;
+}
+
+#add-medicine-button {
+  width: 5%;
+}
+
+.medicine-headers {
+  display: grid; 
+  grid-template-columns: 67% 15% 15%; 
+  margin-bottom: 1em;
+  opacity: 50%;
+
+}
+
+.medicine-name-header {
+  margin-left: 32%;
+}
+
+.medicine-sort {
+  margin-right: 1em;
+}
+
+.medicine-sort-image {
+  width: 20%;
+}
+
+.medicine-sort-image:hover {
+  opacity: 75%;
+  cursor: pointer;
+}
+.inventory-options {
+  background-color:#f0eeed;
+  display: flex; 
+  justify-content: center;
+  top: 83%; 
+  left: 70%;
+  right: 1%;
+  bottom: 3%;
+  position: fixed;
+  border-radius: 15px;
+  box-shadow: 0 2px 3px -2px #000000;
+  
+}
+
+.home-option-menu {
+  background-color:#f0eeed;
+  display: flex; 
+  justify-content: center;
+  top: 83%;
+  left: 93%;
+  padding: .5em;
+  position: fixed;
+  border-radius: 15px;
+  box-shadow: 0 2px 3px -2px #000000;
+  
+}
+
+.home-option-menu:hover {
+  cursor: pointer; 
+}
+
+.whole-page {
+  display: flex;
 }
 
 .main-form {
@@ -78,14 +167,33 @@ input[type=text], input[type=password] {
   margin-bottom: 3em;
 }
 
+.medicine, .medicine-alert, .medicine-expired {
+  border-radius: 15px;
+}
+
+.menu-options {
+  position: fixed;
+  top: 80%;
+  left: 93%;
+  
+}
+.menu-button {
+  width: 93%;
+
+}
+
+.menu-button:hover {
+  cursor: pointer; 
+  opacity: 75%;
+}
+
 .message-no-data {
   display: flex;
   justify-content: center;
   font-size: 1.75rem;    
   opacity: 20%;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  padding-top: 5em;   
-  padding-bottom: 5em;
+  padding-top: 20%;
 }
 
 /* Set a style for all buttons */
@@ -142,14 +250,13 @@ img.avatar {
 
 
 .logo-image {
-  width: 10%;
-  margin-left: 1em;
+  width: 35%;
 }
 
-.navbar-buttons {
-  width: 100%;
-  margin-top: 1em;
+.navbar-options {
   display: flex;
+  justify-content: space-around;
+  align-items: center;
   
 }
 
@@ -167,12 +274,49 @@ img.avatar {
   
 }
 
+.navbar-test {
+  
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+  height: 100%;
+  width: 15%;
+  
+  position: fixed;
+  
+  background-color: gainsboro;
+  box-shadow: 4px 0 5px -3px #000000;
+  border-radius: 5px;
 
 
+}
+
+
+.switch-page-medicine {
+  font-size: .8rem; 
+  display: flex;
+  justify-content: space-around;
+  
+  
+}
+
+.switch-page-value {
+  font-family:'Franklin Gothic Medium', 'Arial Narrow';
+  color: rgb(82, 81, 81);
+}
+
+.page-not-exist {
+  display: none;
+}
+
+.switch-page-value:hover {
+  opacity: 75%;
+  cursor: pointer
+}
 
 .nav-option {
-  width: 7%;
-  height: 15%;
+  width: 15%;
+  height: 25%;
   margin-left: 1em;
   
 
@@ -187,17 +331,16 @@ img.avatar {
 
 .name-slogan {
   font-family: 'Franklin Gothic Medium', 'Arial Narrow';
-  font-size: 1rem;
-  margin-left: 1em;
+  font-size: 2rem;
 
 }
 
 .home-profile {
-  margin-left: 1.75em;
   display: flex;
+  margin-left: .5em;
 }
 
-#home-button {
+#home-button-home {
   width: 9%;
   height: 15%;
   margin-left: 1em;
@@ -230,9 +373,18 @@ img.avatar {
 }
 
 .show-password-button {
-  width: 40px;
+  margin-left: .5em;
+  width: 2em;
 }
 
+#form-displayed {
+  opacity: 50%;
+}
+
+#form-displayed-medicine {
+  opacity: 50%;
+  padding-top: 5%
+}
 
 .password-image-false {
   display: none;
@@ -243,11 +395,9 @@ img.avatar {
   font-weight: normal;
   margin-left: 1em;
   margin-right: 1em;
-  margin-top: 1.1em;
 }
 
 .logout, .logout-medicine {
-  margin-top: .3em;
   width: auto;
   border-radius: 5rem;
   color: black;
@@ -281,6 +431,8 @@ p, a {
   box-shadow: 0 0 5px 10px #f0eeed;
 
 }
+
+
 
 #medicines-part {
   display: grid;
@@ -317,6 +469,12 @@ p, a {
 
 }
 
+.logo-image-form {
+  width: 10%;
+  margin-top: 5em;
+}
+
+
 .medicine-alert-notifications {
   width: 100%;
   display: flex;
@@ -334,27 +492,44 @@ p, a {
 
 .inventory-option {
   display: flex;
-  align-items: center;
+  align-items: center; 
   justify-content: center;
+  
+}
+
+.inventory-options-false {
+  display: none;
+  
 }
 
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 .medicine, .alert {
   display: grid;
   grid-template-columns: 70% 10% 10% 10%;
+  margin-bottom: .5em;
+}
+
+.medicine:nth-child(even) {
+  background-color: rgb(248, 246, 246);
 }
 
 .medicine-alert {
   display: grid;
   grid-template-columns: 70% 10% 10% 10%;
   background-color: lightyellow; 
+  margin-bottom: .5em;
 }
 
 .medicine-expired {
   display: grid;
   grid-template-columns: 70% 10% 10% 10%;
   background-color: #f8d6cc; 
+  margin-bottom: .5em;
 }
 
 .element-name {
@@ -376,8 +551,8 @@ p, a {
 
 .general-information-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-left: 10em;
   
 }
 
@@ -399,16 +574,6 @@ p, a {
 
 .add-medicine-form-false {
   display: none;
-}
-
-#reset-alerts-button, #add-medicine-button {
-  margin-left: 2em;
-  width: 10%;
-}
-
-#set-reset-medicine:hover, #add-medicine-button:hover {
-  opacity: 75%;
-  cursor: pointer;
 }
 
 .input-field-add {
@@ -556,13 +721,11 @@ label {
 }
 
 .part-title-option {
-  width: 8%;
-  height: auto;
-  
-  margin-left: 2em;
+  width: 2rem;      
+  margin-left: .5em;      
 }
 
-.part-title-option:hover {
+.inventory-option:hover {
   opacity: 75%;
   cursor: pointer;
 }
@@ -574,10 +737,11 @@ label {
 }
 
 .statistics {
+  width: 70%;
   margin-left: auto; 
-  width: 40%;
   margin-right: auto;
 }
+
 
 .medicine-notifications {
   margin-top: 2em;
@@ -609,16 +773,18 @@ ul {
   font-weight: 100;
 }
 .medicine-attributes {
-  margin-top: 2em;
-  margin-bottom: 2em;
+  
   display: grid;
   grid-template-columns: 33% 33% 33%;
+  align-items: center;
   margin-left: 10%;
+  
   
 }
 .med-attribute {
   display: flex;
   justify-self: center;
+  margin-bottom: 3em;
 }
 
 .attribute-name {
@@ -652,12 +818,21 @@ ul {
   margin-right: 1em;
 }
 
+#remove-medicine {
+  width: 15%;
+}
+
+
+#remove-medicine-part {
+  margin-right: 2em;
+}
+
 .add-remove-user  {
   
   font-size: .75rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   margin-left: 1em;
-  margin-top: 1.25em;
+  margin-top: .9em;
  
 }
 
@@ -698,9 +873,17 @@ ul {
   margin-right: 1em;
 }
 
+#form-displayed-user {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 10%;
+  opacity: 50%;
+}
+
 #user-manipulation {
   display: flex;
   justify-content: space-around;
+  padding-top: 10%;
 }
 
 .manipulate-user-title {

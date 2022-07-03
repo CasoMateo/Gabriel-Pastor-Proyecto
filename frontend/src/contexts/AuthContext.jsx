@@ -8,45 +8,34 @@ const AuthContextProvider = (props) => {
       let name = cookie_name + "=";
       let decodedCookie = decodeURIComponent(document.cookie);
       let cookies = decodedCookie.split(';');
-      for(let i = 0; i <cokies.length; i++) {
+      for(let i = 0; i <cookies.length; i++) {
         let cur_cookie = cookies[i];
         while (cur_cookie.charAt(0) == ' ') {
           cur_cookie = cur_cookie.substring(1);
         }
-        if (cur_cokie.indexOf(name) == 0) {
-          return cur_cookie.substring(name.length, cur_cokie.length);
+        if (cur_cookie.indexOf(name) == 0) {
+          return cur_cookie.substring(name.length, cur_cookie.length);
         }
       }
-      return false;
-    } 
 
-    const [token, setToken] = useState(getCookie('session_id'));
+    let status = getCookie('session_id');
+    
+    fetch('http://127.0.0.1:8000/is-logged-in', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',  
+        'mode': 'cors',
+        'Cookies': document.cookie
+      }
+    }).then(response => status = (response.status == 200)); 
+
+    const [token, setToken] = useState(status);
     const [renderModifyUsers, setRenderModifyUsers] = useState(getCookie('user_chief')); 
     const [renderVerifyCredentials, setRenderVerifyCredentials] = useState(false);
     const [username, setUsername] = useState(getCookie('username'));
-  
-    const loggedInResource = async () => {
-      const promise = await fetch('http://127.0.0.1:8000/is-logged-in', {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json', 
-          'mode': 'cors',
-          'Cookies': document.cookie
-        }
-      }); 
-      
-      if (promise.status == 200) {
-        setToken(true);
-      } else {
-        setToken(false);
-      } 
-
     
-    };
-
-    loggedInResource();
-
+    
     const login = (username, password) => {
       if ((!username) || (!password)) {
         setRenderVerifyCredentials(true);

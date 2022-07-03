@@ -80,17 +80,15 @@ function Users(props) {
         setInvalid(true);
          
       } else {
+        
+        setUsers(prevState => [...prevState, usernameAdd]);
         setInvalid(false);
         
       }
-      
+       
     };
     
     addUserResource();
-    setUsernameAdd();
-    setPassword();
-    setLevel(false);
-    setRetrievedUsers(false); 
     
 
   }
@@ -124,13 +122,14 @@ function Users(props) {
       } 
       else {
         setInvalid(false);
+        const copy = [...users];
+        setUsers(copy.filter(username => username !== usernameRemove));
+        
       }
       
     };
 
     removeUserResource(); 
-    setUsernameRemove();
-    setRetrievedUsers(false);
 
     
 
@@ -139,41 +138,54 @@ function Users(props) {
   
   return (
     <div>
-      <div className = 'navbar'>
+      
+      <div className = 'navbar-test' id = { verifyRef && 'form-displayed'}>
   
         <div className = 'general-information-container'>
-          <img src = 'gabriel_pastor_logo.png' className = 'logo-image' />
+          <img src = '/gabriel_pastor_logo.png' className = 'logo-image' />
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
-              Nursing Home Name 
-              <br /> 
-              This is their slogan
+              Gabriel Pastor 
+              <br />
+              Foundation
             </h5>
           </div> 
         </div>
 
-        <div className = 'navbar-buttons'>
-          <div className = 'action-navbar'>
+        <div>
+          <div>
             <div className = 'home-profile'>
-              <img className = 'nav-option' id = 'home-button' src = '/home_button.png' onClick = { () => navigate('/home') } /> 
-
-              <h5 className = 'username-attribute'> 
-                { props.username }
+              <img className = {props.renderModifyUsers ? 'nav-option'  : 'home-button-false' } src = '/home_button.png' onClick = { () => navigate('/home') }/> 
+          
+              
+              <h5 className = { props.renderModifyUsers ? 'add-remove-user' : 'add-remove-user-false' } > 
+                Add/Remove User
               </h5>
 
-              <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
-               
-   
+              
+              
             </div>
 
           </div>
 
+          <div className = 'navbar-options'>   
+
+            <img className = { !props.renderModifyUsers ? 'home-button' : 'home-button-false'} src = '/home_button.png' onClick = { () => navigate('/home') } /> 
+            <h5 className = 'username-attribute'> 
+              { props.username }
+            </h5>
+
+            <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
+          </div> 
+
+        
         </div>
+        
 
       </div> 
 
-      <div className = 'main-page' id = 'user-manipulation'>
+      <div className = 'main-page' id = { verifyRef ? 'form-displayed-user' : 'user-manipulation' } >
         <div>
           <p className = 'manipulate-user-title'>
             Add User

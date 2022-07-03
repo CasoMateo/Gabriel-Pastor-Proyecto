@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useContext, Component } from 'react
 import ReactDOM from 'react-dom'; 
 import { useNavigate } from 'react-router-dom';
 import '../index.css';
-import TokenContext from '../contexts/TokenContext';
 import Users from './Users';
 import Medicine from './Medicine';
 import Login from './Login';
@@ -12,22 +11,9 @@ import { AuthContext } from '../contexts/AuthContext';
 
 function Home(props) { 
  
+
   const navigate = useNavigate(); 
   
-  const loggedInResource = async () => {
-    const promise = await fetch('http://127.0.0.1:8000/is-logged-in', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json', 
-        'mode': 'cors',
-        'Cookies': document.cookie
-      }
-    }); 
-    alert(promise.status);
-    return (promise.status == 200);
-  };
-
   if (!props.token) {
     navigate('/login');
   }
@@ -42,11 +28,8 @@ function Home(props) {
 
   const dateInPast = function (givenDate) {
     const given = new Date(givenDate);
-    const diff = new Date().getTime() - given.getTime();
-    if (diff > 0) {
-       return true;
-     }
-    return false;
+    const today = new Date(); 
+    return (given < today);
   };
 
   const [addToMedicineForm, setAddToMedicineForm] = useState(false);
@@ -80,8 +63,6 @@ function Home(props) {
   
     
     setMedicines(response.medicines);
-     
-    return response.medicines; 
   };  
  
   if (!retrievedMedicines) {
@@ -89,30 +70,34 @@ function Home(props) {
     setRetrievedMedicines(true);
   }
 
-  const medicines_status = {}; 
+  const [medicines_status, setMedicinesStatus] = useState({}); 
   
- 
-  medicines.forEach(medicine => {
-
-    let cur_status = 'medicine';
-    
-    medicine.badges.forEach(badge => {
-      if (dateInPast(badge.date)) {
-        cur_status = 'medicine-expired';
+  if ((medicines.length > 0) && (Object.keys(medicines_status).length == 0)) {
+    const cur_medicines = {};
+    medicines.forEach(medicine => {
+      let cur_status = 'medicine';
+      medicine.badges.forEach(badge => {
+        if (dateInPast(badge.date)) {
+          cur_status = 'medicine-expired';
+          
         
-       
-      } else if (dateDiffInDays(badge.date)) {
-        if (cur_status != 'medicine-expired') {
-          cur_status = 'medicine-alert';
-        }
-      } 
-    })
-    
-    medicines_status[medicine._id.$oid] = cur_status;
-  }); 
+        } else if (dateDiffInDays(badge.date)) {
+          if (cur_status != 'medicine-expired') {
+            cur_status = 'medicine-alert';
+          }
+        } 
+        
+      })
+      
+      cur_medicines[medicine._id.$oid] = cur_status;
+    }) 
+  
+    setMedicinesStatus({...medicines_status, ...cur_medicines});
+
+  }
+
 
   const handleSortMedicines = () => {
-    console.log(sortedMedicines);
     if (sortedMedicines) {
       const sorted_medicines = []; 
     
@@ -155,14 +140,12 @@ function Home(props) {
   const handleAddMedicine = () => {
     
     setAddMedicineForm(false);
-    alert(addMedicineAttributes.quantity);
-    alert(addMedicineAttributes.expiry); 
-    alert(addMedicineAttributes.name);
+    
     if (!props.token) {
       navigate('/login');
     }
     
-    if ((addMedicineAttributes.quantity < 0) || (!addMedicineAttributes.expiry) || (dateInPast(addMedicineAttributes.expiry))) {
+    if ((addMedicineAttributes.quantity <= 0) || (!addMedicineAttributes.expiry) || (dateInPast(addMedicineAttributes.expiry))) {
       alert('Not valid data');
       return;
     }
@@ -183,7 +166,8 @@ function Home(props) {
 
       if ((promise.status != 200) || (!response.added)) {
         alert('Not properly added');
-        return;
+      } else {
+        setRetrievedMedicines(false);
       }
       
 
@@ -192,8 +176,6 @@ function Home(props) {
     addMedicineResource();
     
     setAddMedicineAttributes();
-    
-    setRetrievedMedicines(false);
      
   } 
 
@@ -222,26 +204,24 @@ function Home(props) {
       }); 
   
       const response = await promise.json(); 
-      console.log(response);
+
       if ((promise.status != 200) || (!response.addedTo)) {
         alert('Not properly modified');
-        return;
+      } else {
+        setRetrievedMedicines(false);
       }
       
     }; 
 
     addToMedicineResource();
     setAddToMedicineAttributes();
-    setRetrievedMedicines(false);
   
   }
 
   const handleSubstoMedicine = () => {
     
     setSubsToMedicineForm(false);
-    alert(subsToMedicineAttributes.quantity);
-    alert(subsToMedicineAttributes.medicine_id); 
-    alert(subsToMedicineAttributes.expiry);
+
     if (!props.token) {
       navigate('/login');
     }
@@ -263,10 +243,11 @@ function Home(props) {
       });
       
       const response = await promise.json();
-      console.log(response);
+
       if ((promise.status != 200) || (!response.subsTo)) {
         alert('Not properly modified');
-        return;
+      } else {
+        setRetrievedMedicines(false);
       }
 
     };
@@ -274,9 +255,6 @@ function Home(props) {
     subsToMedicineResource();
     setSubsToMedicineAttributes();
     
-     
-
-    setRetrievedMedicines(false);
   }
 
 
@@ -321,63 +299,66 @@ function Home(props) {
 
   return (
     <div>
-      <div className = 'navbar'>
+      <div className = 'navbar-test' id = { (addMedicineForm || addToMedicineForm || subsToMedicineForm || verifyRef ) && 'form-displayed'}>
   
         <div className = 'general-information-container'>
           <img src = 'gabriel_pastor_logo.png' className = 'logo-image' />
 
           <div className = 'name-slogan'>
             <h5 className = 'el-name-slogan'>
-              Nursing Home Name 
+              Gabriel Pastor 
               <br />
-              This is their slogan
+              Foundation
             </h5>
           </div> 
         </div>
 
-        <div className = 'navbar-buttons'>
-          <div >
+        <div className = 'test'>
+          <div>
             <div className = 'home-profile'>
-              <img className = {props.renderModifyUsers && 'nav-option' } id = { !props.renderModifyUsers && 'home-button'} src = '/home_button.png' /> 
-            
-              
-
+              <img className = {props.renderModifyUsers ? 'nav-option'  : 'home-button-false' } src = '/home_button.png' /> 
+          
               
               <h5 className = { props.renderModifyUsers ? 'add-remove-user' : 'add-remove-user-false' } onClick = { () => modifyUsers() }> 
                 Add/Remove User
               </h5>
 
-              <h5 className = 'username-attribute'> 
-                { props.username }
-              </h5>
-
-              <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
+              
               
             </div>
 
           </div>
 
-        </div>
+          <div className = 'navbar-options'>   
+
+            <img className = { !props.renderModifyUsers ? 'home-button' : 'home-button-false'} src = '/home_button.png' onClick = { () => navigate('/home') } /> 
+            <h5 className = 'username-attribute'> 
+              { props.username }
+            </h5>
+
+            <button className = 'logout' onClick = { () =>  { setVerifyRef(true) } } > Logout </button>
+          </div>
+        </div> 
+
+        
+
+        
 
       </div> 
 
-      <div className = 'main-page'>
-        <div className = 'page-title' id = 'medicines-part' >
-          <p className = 'cur-title'> Inventory </p>
-
-
-          <div className = 'inventory-option'>
-            <p> ADD MED. </p>
-            <img src = '/create_button.png' className = 'part-title-option' id = 'add-medicine-button' onClick = { () => setAddMedicineForm(true) } />
-          </div>
-
-          <div className = 'inventory-option'>
-            <p> { !sortedMedicines && 'UN' }SORT BY EXPIRY </p>
-            <img src = '/sort_button.png' className = 'part-title-option' onClick = { () => { handleSortMedicines(); setSortedMedicines(prevState => !prevState) } }/>
-          </div>
-        </div>
-
+      <div className = 'main-page' id = { (addMedicineForm || addToMedicineForm || subsToMedicineForm || verifyRef ) && 'form-displayed'}>
         
+        { medicines.length != 0 &&
+        <div className = 'medicine-headers'>
+          <p className = 'medicine-name-header'> Name </p> 
+          <p> Quantity</p> 
+          <div className = 'inventory-option' onClick = { () => { handleSortMedicines(); setSortedMedicines(prevState => !prevState) } } >
+            <p className = 'medicine-sort'> { !sortedMedicines && 'Un' }Sort by date </p>
+            <img src = '/sort_button.png' className = 'medicine-sort-image' />
+          </div>
+
+        </div>
+        }
         <div className = 'medicine-list-root'> 
           { medicines.length == 0 
             ?   
@@ -385,11 +366,11 @@ function Home(props) {
               No medicines available
             </div>
             :
-            
+
             medicines.map(medicine => 
               
                 
-              <div className = { medicines_status[medicine._id.$oid]}>
+              <div key = { medicine._id.$oid } className = { medicines_status[medicine._id.$oid]} >
                 <p className = 'medicine-name' onClick = { () => NavigateMedicine(medicine._id.$oid) }> 
                   { medicine.name }
                 </p>
@@ -502,13 +483,11 @@ function Home(props) {
         </div>
       </div>
 
-      
-
-      
-
-
-      
+      <img className = 'home-option-menu' src = '/create_button.png' id = 'add-medicine-button' onClick = { () => setAddMedicineForm(true) } />
+             
     </div> 
+
+ 
     
 
   );

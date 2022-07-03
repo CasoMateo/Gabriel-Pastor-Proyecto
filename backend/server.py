@@ -133,7 +133,6 @@ def authenticatedUser(session_id, username):
 
 
 def authorizedUserChief(username, user_chief):
-
     if not user_chief:
         return False
 
@@ -146,11 +145,6 @@ def authorizedUserChief(username, user_chief):
 
 def clearSessionFromDatabase(username):
     users.update_one({'username': username}, {'?unset': {'session_id': ''}})
-
-
-@app.get("/")
-def hello():
-    return "Welcome"
 
 
 @app.post("/login", status_code=202)
@@ -192,15 +186,13 @@ def isLoggedIn(request: Request):
     if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    pass
-
 
 @app.post("/logout", status_code=200)
 def logout(request: Request, user: findUser, session_id: Optional[str] = Cookie(None), user_chief: Optional[str] = Cookie(None), username: Optional[str] = Cookie(None)):
 
     if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])):
         raise HTTPException(status_code=401, detail="Unauthorized")
-       # check if given header cookies match database cookies
+      # check if given header cookies match database cookies
     if not users.find_one_and_update({'username': user.username}, {'$unset': {'session_id': ''}}):
         raise HTTPException(status_code=400, detail="Invalid request")
 
@@ -214,7 +206,7 @@ def getUsers(request: Request):
 
     if not authenticatedUser(getCookie('session_id', request.headers['cookies']), getCookie('username', request.headers['cookies'])) or not authorizedUserChief(getCookie('username', request.headers['cookies']), getCookie('user_chief', request.headers['cookies'])):
         raise HTTPException(status_code=401, detail="Unauthorized")
-       # check if given header cookies match database cookies
+      # check if given header cookies match database cookies
 
     usernames = []
     all_users = [user for user in users.find()]
@@ -335,7 +327,7 @@ def addToMedicine(request: Request, attributes: MedicineModify, session_id: Opti
     if attributes.quantity > 0 and attributes.expiry:
 
         for badge in range(len(medicine['badges'])):
-            if medicine['badges'][badge]['date'] == attributes.expiry:
+            if medicine.get('badges')[badge].get('date') == attributes.expiry:
                 medicine['badges'][badge]['quantity'] += attributes.quantity
                 content['addedTo'] = True
                 medicines.delete_one({'_id': ObjectId(attributes.medicine_id)})
@@ -372,7 +364,7 @@ def subsToMedicine(request: Request, attributes: MedicineModify, session_id: Opt
     if attributes.quantity > 0 and attributes.expiry:
 
         for badge in range(len(medicine['badges'])):
-            if medicine['badges'][badge]['date'] == attributes.expiry and medicine['badges'][badge]['quantity'] >= attributes.quantity:
+            if medicine.get('badges')[badge].get('date') == attributes.expiry and medicine.get('badges')[badge].get('quantity') >= attributes.quantity:
                 if medicine['badges'][badge]['quantity'] == attributes.quantity:
                     medicine['badges'] = medicine['badges'][: badge] + \
                         medicine['badges'][badge + 1:]
