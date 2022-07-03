@@ -1,16 +1,18 @@
-from typing import Optional
-from fastapi import Cookie, FastAPI, HTTPException, Request
-from fastapi.testclient import TestClient
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from pymongo import MongoClient
+import os
+import json
 import bcrypt
 import datetime
+
 from uuid import uuid4
-from bson import json_util, ObjectId
-import json
+from typing import Optional
+
 from bson.binary import UUID
+from pydantic import BaseModel
+from pymongo import MongoClient
+from bson import json_util, ObjectId
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Cookie, FastAPI, HTTPException, Request
 
 
 # checar response model
@@ -28,7 +30,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-cluster = MongoClient()
+NOSQL_USER = os.environ.get('NOSQL_USER', '')
+NOSQL_PASS = os.environ.get('NOSQL_PASS', '')
+NOSQL_HOST = os.environ.get('NOSQL_HOST', '')
+NOSQL_PORT = os.environ.get('NOSQL_PORT', 27050)
+
+
+def get_mongo_url():
+    ''' Returns proper mongo connection URL from env file. '''
+    # CLOUD
+    # return f''
+    # local
+    return f'mongodb://{NOSQL_HOST}:{NOSQL_PORT}/'
+
+
+cluster = MongoClient(
+    get_mongo_url(),
+    username=NOSQL_USER,
+    password=NOSQL_PASS
+)
 db = cluster['InventoryManagement']
 medicines = db['medicines']
 users = db['users']

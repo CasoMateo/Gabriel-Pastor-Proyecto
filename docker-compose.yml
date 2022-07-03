@@ -1,0 +1,57 @@
+version: "3.7"
+
+services:
+  server:
+    build: ./backend
+    # for future process
+    command: python backend/main.py
+    volumes:
+      - ./:/app
+    ports:
+      - 8000:8000
+      - 80:80
+    shm_size: 4gb
+    stdin_open: true # docker run -i
+    tty: true # docker run -t
+    environment:
+      - ENVIRONMENT=dev
+      - TESTING=0
+      - PYTHONPATH=/app
+    env_file:
+      - ./backend/config/development.all.env
+      - ./backend/config/secrets.env
+    depends_on:
+      - mongo_db
+    links:
+      - mongo_db
+
+  mongo_db:
+    image: mongo
+    restart: always
+    hostname: mongo_db
+    environment:
+      MONGO_INITDB_DATABASE: InventoryManagement
+    ports:
+      - "27050:27017"
+
+  frontend:
+    image: node:12-alpine
+    volumes:
+      - ./frontend:/app
+    working_dir: /app
+    ports:
+      - 3000:3000
+    expose:
+      - 3000
+    links:
+      - server
+    command: npm start
+    tty: true
+    networks:
+      - frontend
+    depends_on:
+      - server
+
+networks:
+  frontend:
+    driver: bridge

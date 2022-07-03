@@ -14,7 +14,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install system dependencies
 RUN apt-get update \
-  && apt-get -y install netcat gcc gnupg1 firefox-esr wget\
+  && apt-get -y install netcat gcc gnupg1 wget\
   && apt-get clean
 
 RUN apt-get install -y libxml2-dev libxslt-dev python-dev
@@ -26,4 +26,4 @@ COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
 # add app
-COPY . .
+COPY ./backend .
