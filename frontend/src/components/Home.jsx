@@ -11,7 +11,6 @@ import { AuthContext } from '../contexts/AuthContext';
 
 function Home(props) { 
  
-  setTimeout(2000);
   const navigate = useNavigate(); 
   
   if (!props.token) {

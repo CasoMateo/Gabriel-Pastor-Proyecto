@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    # for future process
+    command: python3 main.py
+    ports:
+      - 8000:8000
+    expose: 
+      - 8000
+    tty: true # docker run -t
+    env_file:
+      - ./backend/config/development.all.env
+    restart: always
+  
+  frontend:
+    image: node:16.15.1-alpine
+    working_dir: /frontend_app
+    volumes:
+      - ./frontend:/frontend_app
+    command: npm start
+    ports:
+      - 3000:3000
+    expose:
+      - 3000
+    tty: true
+    networks:
+      - frontend
+    links:
+      - backend
+    depends_on:
+      - backend
+    restart: always
+
+networks:
+  frontend:
+    driver: bridge
+    
+    

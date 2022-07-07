@@ -30,7 +30,7 @@ app.add_middleware(
   allow_headers=["*"],
 )
 
-load_dotenv('../frontend/.env')
+load_dotenv('./config/development.all.env')
 cluster = MongoClient(os.getenv("CONNECTION_TO_DB"))
 db = cluster['InventoryManagement']
 medicines = db['medicines']
