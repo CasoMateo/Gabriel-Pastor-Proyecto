@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react'; 
 import { useNavigate, Navigate } from 'react-router-dom'; 
-export const AuthContext = createContext(); 
 import { BrowserRouter as Router, Link, Redirect, Route, RouteComponentProps, withRouter } from 'react-router-dom';
+
+export const AuthContext = createContext(); 
 
 const AuthContextProvider = (props) => {
     function getCookie(cookie_name) {
@@ -17,7 +18,7 @@ const AuthContextProvider = (props) => {
           return cur_cookie.substring(name.length, cur_cookie.length);
         }
       }
-
+    }
     let status = getCookie('session_id');
     
     fetch('http://127.0.0.1:8000/is-logged-in', {
@@ -134,6 +135,7 @@ const AuthContextProvider = (props) => {
           { props.children }
         </AuthContext.Provider>
     );
+
 }
 
 export default AuthContextProvider; 
