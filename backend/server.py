@@ -44,10 +44,8 @@ def get_mongo_url():
     return f'mongodb://{NOSQL_HOST}:{NOSQL_PORT}/'
 
 
-cluster = MongoClient(
-    get_mongo_url(),
-    username=NOSQL_USER,
-    password=NOSQL_PASS
+cluster = MongoClient("mongodb+srv://InventoryManager:CasMat2*<>@proyectogabrielpastor.hfvj9.mongodb.net/?retryWrites=true&w=majority"
+
 )
 db = cluster['InventoryManagement']
 medicines = db['medicines']
